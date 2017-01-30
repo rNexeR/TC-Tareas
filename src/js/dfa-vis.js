@@ -53,8 +53,13 @@ deleteState = function(pos){
     if(confirm('If you delete a state, all transitions linked to the state will also be deleted. Continue?')){
         console.log('State ', dfa.states[pos].label, 'deleted');
         deleteVisState([dfa.states[pos].id]);
+        let t_to_delete = dfa.transitions.filter(x => x.from == dfa.states[pos].id || x.to == dfa.states[pos].id);
+        let array = [];
+        t_to_delete.forEach(x => array.push(x.id));
+        deleteVisTransition(array);
         dfa.deleteState(pos);
         this.renderStatesSection();
+        this.renderTransitionsSection();
         
     }
 }
@@ -127,29 +132,30 @@ evaluateDFA = function(){
 
 window.onload = function(){
   // create an array with statess
-  /*let states = [
+  let states = [], transitions = [];
+  states = [
   {id: 0, label: 'root'},
   {id: 1, label: '0'},
   {id: 2, label: '01'}
   ];
 
     // create an array with transitions
-    let transitions = [
+    transitions = [
     {from: 0, to: 0, label: '1'},
     {from: 0, to: 1, label: '0'},
     {from: 1, to: 2, label: '1'},
     {from: 2, to: 2, label: '0'}
     ];
 
-    dfa = new DFA(states, transitions, ['0', '1']);*/
+    dfa = new DFA(states, transitions, ['0', '1']);
     //this.renderHTML();
 
     // create a network
     let container = document.getElementById('mynetwork');
 
     // provide the data in the vis format
-     statesDS = new vis.DataSet([]);
-     transitionsDS = new vis.DataSet([]);
+    statesDS = new vis.DataSet(states);
+    transitionsDS = new vis.DataSet(transitions);
 
     let data = {
         nodes: statesDS,
