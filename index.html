@@ -14,7 +14,7 @@
   <link href="./src/css/flat-ui.css" rel="stylesheet" type="text/css" />
 
 
-  <title>DFA / AFD</title>
+  <title>DFA</title>
   <style type="text/css">
     #mynetwork {
       width: 100%;
@@ -29,8 +29,8 @@
 
   <div>
     <h1 class="demo-logo text-center">
-      DFA / AFD
-      <small>Nexer Rodriguez</small>
+      DFA
+      <small>Deterministic Finite Automaton</small>
     </h1>
     <div class="row" style="width: 100%">
       <div class="col-md-6">
@@ -66,7 +66,7 @@
             <div class="panel-heading" role="tab" id="headingTwo">
               <h4 class="panel-title">
                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#nodes" aria-expanded="false" aria-controls="collapseTwo">
-                  Nodes Section
+                  States Section
                 </a>
               </h4>
             </div>
@@ -78,10 +78,12 @@
                   <div class="form-group">
                     <input type="text" class="form-control" id="newState" placeholder="Label" required>
                   </div>
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" id="isFinal"> Final?
-                    </label>
+                  <div class="form-group">
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" id="isFinal"> Final
+                      </label>
+                    </div>  
                   </div>
                   <button type="submit" class="btn btn-primary">Add</button>
                 </form>
@@ -124,14 +126,66 @@
             </div>
             <div id="evaluations" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
               <div class="panel-body">
+                <form onsubmit="return evaluateDFA()" class="form-inline col-md-12">
+                  <div class="form-group">
+                    <input type="text" class="form-control" id="str" placeholder="String to evaluate" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Evaluate</button>
+                  <div class="form-group" style="font-size: 25px" id="result">
 
+                  </div>
+                </form>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</body>
 
-</html>
+      <div class="col-md-12" style="margin-top: 10px">
+        <h6>States Reference</h5>
+          <div class="row demo-swatches-row">
+            <div class="swatches-col">
+              <div class="pallete-item">
+                <dl class="palette" style="border-radius: 100%; background-color: #34495e">
+                  <dt class="text-center" style="color: white">Initial</dt>
+                </dl>
+              </div>
+              <div class="pallete-item">
+                <dl class="palette" style="border-radius: 100%; background-color: #bdc3c7">
+                  <dt class="text-center" style="color: black">Normal</dt>
+                </dl>
+              </div>
+              <div class="pallete-item">
+                <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                  <dt class="text-center" style="color: black">Final</dt>
+                </dl>
+              </div>
+              <div class="pallete-item">
+                <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                  <dt class="text-center" style="color: white">Initial Final</dt>
+                </dl>
+              </div>
+            </div> <!-- /swatches items -->
+          </div>
+        </div>
+      </div>
+
+      <div id="edit" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Edit</h4>
+            </div>
+            <div id="modalContent" class="modal-body">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" onclick="Javascript:editar()" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+
+    </html>
