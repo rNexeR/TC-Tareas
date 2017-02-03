@@ -2,8 +2,8 @@
 
 <head>
   <script type="text/javascript" src="./src/js/vis.js"></script>
-  <script type="text/javascript" src="./src/js/dfa.js"></script>
-  <script type="text/javascript" src="./src/js/dfa-vis.js"></script>
+  <script type="text/javascript" src="./src/js/automata.js"></script>
+  <script type="text/javascript" src="./src/js/automata-vis.js"></script>
   <script type="text/javascript" src="./src/js/renderer.js"></script>
   <script type="text/javascript" src="./src/js/jquery.min.js"></script>
   <script type="text/javascript" src="./src/js/bootstrap.js"></script>
@@ -14,7 +14,7 @@
   <link href="./src/css/flat-ui.css" rel="stylesheet" type="text/css" />
 
 
-  <title>DFA</title>
+  <title>Automatas</title>
   <style type="text/css">
     #mynetwork {
       width: 100%;
@@ -29,26 +29,50 @@
 
   <div>
     <h1 class="demo-logo text-center">
-      DFA
-      <small>Deterministic Finite Automaton</small>
+      Automaton
+      <small>Nexer Rodriguez</small>
     </h1>
     <div class="row" style="width: 100%">
       <div class="col-md-6">
         <div id="mynetwork"></div>
       </div>
       <div class="col-md-6">
+        <h4 class="text-center" id="title"></h4>
 
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
           <div class="panel panel-default">
             <div class="panel-heading" role="tab" id="headingOne">
               <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#alphabet" aria-expanded="false" aria-controls="alphabet">
-                  Alphabet Section
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#type" aria-expanded="false" aria-controls="alphabet">
+                  Type
                 </a>
               </h4>
             </div>
-            <div id="alphabet" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+            <div id="type" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                <form onsubmit="return setType()" class="form-inline col-md-12">
+                  <div class="form-group">
+                    <select id="automataType" class="form-control" data-toggle="select">
+                      <option value="dfa" selected>DFA</option>
+                      <option value="nfa">NFA</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Set Type</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+              <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#alphabet" aria-expanded="false" aria-controls="alphabet">
+                  Alphabet
+                </a>
+              </h4>
+            </div>
+            <div id="alphabet" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
               <div class="panel-body">
                 <ul id="alphabet-list" class="list-group col-md-6">
                 </ul>
@@ -66,7 +90,7 @@
             <div class="panel-heading" role="tab" id="headingTwo">
               <h4 class="panel-title">
                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#nodes" aria-expanded="false" aria-controls="collapseTwo">
-                  States Section
+                  States
                 </a>
               </h4>
             </div>
@@ -95,7 +119,7 @@
             <div class="panel-heading" role="tab" id="headingThree">
               <h4 class="panel-title">
                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#transitions" aria-expanded="false" aria-controls="collapseThree">
-                  Transitions Section
+                  Transitions
                 </a>
               </h4>
             </div>
@@ -120,13 +144,13 @@
             <div class="panel-heading" role="tab" id="headingThree">
               <h4 class="panel-title">
                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#evaluations" aria-expanded="false" aria-controls="collapseThree">
-                  Evaluation Section
+                  Evaluation
                 </a>
               </h4>
             </div>
             <div id="evaluations" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
               <div class="panel-body">
-                <form onsubmit="return evaluateDFA()" class="form-inline col-md-12">
+                <form onsubmit="return evaluateAutomata()" class="form-inline col-md-12">
                   <div class="form-group">
                     <input type="text" class="form-control" id="str" placeholder="String to evaluate" required>
                   </div>

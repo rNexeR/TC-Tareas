@@ -1,7 +1,8 @@
-class DFA{
-	constructor(states = [], transitions = [], alphabet = []){
+class Automaton{
+	constructor(type, states = [], transitions = [], alphabet = []){
 		if(!alphabet)
 			return;
+		this.type = type;
 		this.states = states;
 		if(states.length-1 > 0)
 			this.states[states.length-1].final = true;
@@ -25,7 +26,7 @@ class DFA{
 
 	//states
 	addState(stateLabel, isFinal){
-		let state = {label: '['+this.nextStateId+'] '+stateLabel};
+		let state = {label: stateLabel};
 		state.color = '#bdc3c7';
 		state.id = this.nextStateId;
 		this.nextStateId++;
@@ -89,7 +90,7 @@ class DFA{
 				this.states[i].final = true;
 				this.states[i].color = '#2ecc71';
 			}
-			this.states[i].label = '['+i+'] ' + this.states[i].label; 
+			this.states[i].label = this.states[i].label; 
 			this.states[i].id = i;
 		}
 		this.nextStateId = this.states.length;
@@ -110,8 +111,8 @@ class DFA{
 		this.transitions[pos].color = '#f1c40f';
 	}
 
-	eval(str){
-		console.log("Evaluando: ", str);
+	evalDFA(str){
+		console.log("Evaluando DFA: ", str);
 		let root = this.states.filter(x=> x.root == true)[0];
 		for (var i = 0; i < str.length; i++) {
 			let letra = str[i];
@@ -123,12 +124,12 @@ class DFA{
 			let stateTransitions = this.transitions.filter(x => x.from == root.id);
 			if(stateTransitions.length == 0)
 				return false;
-			console.log("state transitions: " + JSON.stringify(stateTransitions));
+			//console.log("state transitions: " + JSON.stringify(stateTransitions));
 			
 			let nextState = stateTransitions.filter(x => x.label == letra);
 			if(nextState.length == 0)
 				return false;
-			console.log("next state: " + JSON.stringify(nextState));
+			//console.log("next state: " + JSON.stringify(nextState));
 
 			root = this.states.filter(x => x.id == nextState[0].to);
 			if(root.length == 0)
@@ -137,6 +138,60 @@ class DFA{
 			console.log("width " + letra + " > " + root.label);
 		}
 		return root.final == true;
+	}
+
+	evalNFA(str, root){
+		console.log("Evaluando NFA: ", str, " root: ", root.label);
+		for (var i = 0; i < str.length; i++) {
+			let letra = str[i];
+			
+			if(!this.alphabet.includes(letra)){
+				return false;
+			}
+
+			let stateTransitions = this.transitions.filter(x => x.from == root.id);
+			if(stateTransitions.length == 0)
+				return false;
+			//console.log("state transitions: " + JSON.stringify(stateTransitions));
+
+			let nextState = stateTransitions.filter(x => x.label == letra);
+			if(nextState.length == 0)
+				return false;
+			//console.log("next state: " + JSON.stringify(nextState));
+
+			if(nextState.length > 1){
+				console.log("More than 1 next state found");
+				for (var j = nextState.length - 1; j >= 0; j--) {
+					
+					let nroot = this.states.filter(x => x.id == nextState[j].to)[0];
+					let nstr = str.slice(i+1, str.length);
+
+					let result = this.evalNFA(nstr,nroot) == true;
+					console.log("next state["+j+"] returns: "+ result);
+					if(result){
+						return true;
+					}
+					
+				}
+			}else{
+				root = this.states.filter(x => x.id == nextState[0].to);
+				if(root.length == 0)
+					return false;
+				root = root[0];
+				console.log("width " + letra + " > " + root.label);
+			}
+
+		}
+		return root.final == true;
+	}
+
+	eval(str){
+		if(this.type == "dfa"){
+			return this.evalDFA(str);
+		}else if(this.type == "nfa"){
+			let root = this.states.filter(x=> x.root == true)[0];
+			return this.evalNFA(str, root);
+		}
 	}
 
 }

@@ -1,12 +1,12 @@
-var dfa = new DFA([],[],['0','1']);
+var automata = new Automaton("dfa",[],[],[]);
 var newwork = {};
 var statesDS = [];
 var transitionsDS = [];
 
 addAlphabet = function(){
     let value = document.getElementById('newSymbol').value;
-    if(!dfa.alphabet.includes(value)){
-        dfa.alphabet.push(value);
+    if(!automata.alphabet.includes(value)){
+        automata.alphabet.push(value);
         this.renderAlphabetSection();
         console.log('Symbol ', value, 'added');
     }
@@ -16,12 +16,12 @@ addAlphabet = function(){
 
 deleteAlphabet = function(pos){
     if(confirm('If you delete a symbol, all transitions linked to the symbol will also be deleted. Continue?')){
-        console.log('Symbol ', dfa.alphabet[pos], 'deleted');
+        console.log('Symbol ', automata.alphabet[pos], 'deleted');
         var toDelete = [];
-        dfa.transitions.filter(x => x.label == dfa.alphabet[pos]).forEach(x => toDelete.push(x.id));
-        dfa.transitions = dfa.transitions.filter(x => x.label != dfa.alphabet[pos]);
+        automata.transitions.filter(x => x.label == automata.alphabet[pos]).forEach(x => toDelete.push(x.id));
+        automata.transitions = automata.transitions.filter(x => x.label != automata.alphabet[pos]);
         deleteVisTransition(toDelete);
-        dfa.alphabet.splice(pos);
+        automata.alphabet.splice(pos);
         this.renderAlphabetSection();
         
     }
@@ -30,9 +30,9 @@ deleteAlphabet = function(pos){
 addState = function(){
     let value = document.getElementById('newState').value;
     let isFinal = document.getElementById('isFinal').checked;
-    if(dfa.states.filter(x => x.label == value).length == 0){
-        dfa.addState(value, isFinal);
-        statesDS.add(dfa.states[dfa.states.length -1]);
+    if(automata.states.filter(x => x.label == value).length == 0){
+        automata.addState(value, isFinal);
+        statesDS.add(automata.states[automata.states.length -1]);
         this.renderStatesSection();
         console.log('State ', value, 'added');
         
@@ -44,20 +44,20 @@ addState = function(){
 
 editState = function(pos){
     let label = document.getElementById('stateLabel').value;
-    dfa.states[pos].label = label;
-    statesDS.update(dfa.states[pos]);
+    automata.states[pos].label = label;
+    statesDS.update(automata.states[pos]);
     renderStatesSection();
 }
 
 deleteState = function(pos){
     if(confirm('If you delete a state, all transitions linked to the state will also be deleted. Continue?')){
-        console.log('State ', dfa.states[pos].label, 'deleted');
-        deleteVisState([dfa.states[pos].id]);
-        let t_to_delete = dfa.transitions.filter(x => x.from == dfa.states[pos].id || x.to == dfa.states[pos].id);
+        console.log('State ', automata.states[pos].label, 'deleted');
+        deleteVisState([automata.states[pos].id]);
+        let t_to_delete = automata.transitions.filter(x => x.from == automata.states[pos].id || x.to == automata.states[pos].id);
         let array = [];
         t_to_delete.forEach(x => array.push(x.id));
         deleteVisTransition(array);
-        dfa.deleteState(pos);
+        automata.deleteState(pos);
         this.renderStatesSection();
         this.renderTransitionsSection();
         
@@ -77,13 +77,13 @@ addTransition = function(){
     let frm = parseInt(document.getElementById('fromOptions').value);
     let to = parseInt(document.getElementById('toOptions').value);
     let label = document.getElementById('newTransition').value;
-    if(dfa.transitions.filter(x => x.from == frm && x.to == to && x.label == label).length == 0){
-        if(!dfa.addTransition(frm, to, label))
+    if(automata.transitions.filter(x => x.from == frm && x.to == to && x.label == label).length == 0){
+        if(!automata.addTransition(frm, to, label))
             return false;
-        transitionsDS.add(dfa.transitions[dfa.transitions.length -1]);
+        transitionsDS.add(automata.transitions[automata.transitions.length -1]);
         this.renderTransitionsSection();
         console.log('Transition from ',frm, ' to ', to, ' label ', label, ' added');
-        console.log(JSON.stringify(dfa.transitions));
+        console.log(JSON.stringify(automata.transitions));
         
     }
 
@@ -94,18 +94,18 @@ editTransition = function(pos){
     let label = document.getElementById('transitionLabel').value;
     let frm = document.getElementById('transitionFrom').value;
     let to = document.getElementById('transitionTo').value;
-    dfa.transitions[pos].label = label;
-    dfa.transitions[pos].from = frm;
-    dfa.transitions[pos].to = to;
-    transitionsDS.update(dfa.transitions[pos]);
+    automata.transitions[pos].label = label;
+    automata.transitions[pos].from = frm;
+    automata.transitions[pos].to = to;
+    transitionsDS.update(automata.transitions[pos]);
     renderTransitionsSection();
 }
 
 deleteTransition = function(pos){
     if(confirm('Confirm deletion of Transition')){
-        console.log('Transition from ',dfa.transitions[pos].from, ' to ', dfa.transitions[pos].to, ' label ', dfa.transitions[pos].label, ' added');
-        this.deleteVisTransition([dfa.transitions[pos].id]);
-        dfa.transitions.splice(pos,1);
+        console.log('Transition from ',automata.transitions[pos].from, ' to ', automata.transitions[pos].to, ' label ', automata.transitions[pos].label, ' added');
+        this.deleteVisTransition([automata.transitions[pos].id]);
+        automata.transitions.splice(pos,1);
         this.renderTransitionsSection();
         
     }
@@ -119,14 +119,25 @@ deleteVisState = function(ids){
     ids.forEach(x => statesDS.remove({id: x}));
 }
 
-evaluateDFA = function(){
-    let str = document.getElementById('str').value;
-    let result = dfa.eval(str);
-    
-    let target = document.getElementById('result');
-    let html = `<span class="fui-` + (result ? `check` : `cross`) + `"></span>`;
-    target.innerHTML = html;
+evaluateAutomata = function(){
+    try{
+        let str = document.getElementById('str').value;
+        let result = automata.eval(str);
 
+        let target = document.getElementById('result');
+        let html = `<span class="fui-` + (result ? `check` : `cross`) + `"></span>`;
+        target.innerHTML = html;
+
+        return false;
+    }catch(e){
+        alert(e);
+    }
+}
+
+setType =function(){
+    let type = document.getElementById('automataType').value;
+    this.automata.type = type;
+    renderAutomataType();
     return false;
 }
 
@@ -136,18 +147,26 @@ window.onload = function(){
   states = [
   {id: 0, label: 'root'},
   {id: 1, label: '0'},
-  {id: 2, label: '01'}
+  {id: 2, label: '00', final: true},
+  {id: 3, label: '1'},
+  {id: 4, label: '11', final: true},
   ];
 
     // create an array with transitions
     transitions = [
     {from: 0, to: 0, label: '1'},
+    {from: 0, to: 0, label: '0'},
+    {from: 1, to: 2, label: '0'},
     {from: 0, to: 1, label: '0'},
-    {from: 1, to: 2, label: '1'},
-    {from: 2, to: 2, label: '0'}
+    {from: 0, to: 3, label: '1'},
+    {from: 3, to: 4, label: '1'},
+    {from: 2, to: 2, label: '0'},
+    {from: 4, to: 4, label: '0'},
+    {from: 2, to: 2, label: '1'},
+    {from: 4, to: 4, label: '1'},
     ];
 
-    dfa = new DFA(states, transitions, ['0', '1']);
+    automata = new Automaton("nfa", states, transitions, ['0', '1']);
     //this.renderHTML();
 
     // create a network
@@ -161,7 +180,14 @@ window.onload = function(){
         nodes: statesDS,
         edges: transitionsDS
     };
-    let options = {};
+    //let options = {};
+    let options = {
+            "nodes": {
+              "shapeProperties": {
+                  "interpolation": false
+              }
+          }
+      };
 
     // initialize your network!
     network = new vis.Network(container, data, options);
