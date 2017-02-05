@@ -72,6 +72,43 @@ renderTransitionEdit = function(pos){
 renderAutomataType = function(){
     let target = document.getElementById('title');
     target.innerHTML = automata.type.toUpperCase();
+    this.renderConversionOptions();
+}
+
+renderConversionOptions = function(){
+    let target = document.getElementById('conversionOptions');
+    let html = "";
+    if(automata.type == "nfa"){
+        html += `<button onclick="convertToDFA()" class="btn btn-inverse">to DFA</button>`;
+    }
+
+    target.innerHTML = html;
+}
+
+renderConversion = function(convertedAutomata){
+    let container = document.getElementById('conversionDiv');
+
+    // provide the data in the vis format
+    let statesDS = new vis.DataSet(convertedAutomata.states);
+    let transitionsDS = new vis.DataSet(convertedAutomata.transitions);
+
+    let data = {
+        nodes: statesDS,
+        edges: transitionsDS
+    };
+    //let options = {};
+    let options = {
+            "nodes": {
+              "shapeProperties": {
+                  "interpolation": false
+              }
+          }
+      };
+
+    // initialize your network!
+    let conversion = new vis.Network(container, data, options);
+    $('#newConversion').modal('show');
+
 }
 
 renderHTML = function(){
@@ -79,4 +116,5 @@ renderHTML = function(){
     this.renderStatesSection();
     this.renderTransitionsSection();
     this.renderAutomataType();
+    this.renderConversionOptions();
 }

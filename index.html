@@ -5,6 +5,7 @@
   <script type="text/javascript" src="./src/js/automata.js"></script>
   <script type="text/javascript" src="./src/js/automata-vis.js"></script>
   <script type="text/javascript" src="./src/js/renderer.js"></script>
+  <script type="text/javascript" src="./src/js/utils.js"></script>
   <script type="text/javascript" src="./src/js/jquery.min.js"></script>
   <script type="text/javascript" src="./src/js/bootstrap.js"></script>
 
@@ -16,7 +17,7 @@
 
   <title>Automatas</title>
   <style type="text/css">
-    #mynetwork {
+    #mynetwork, #conversionDiv {
       width: 100%;
       height: 70%;
       border: 1px solid lightgray;
@@ -162,54 +163,83 @@
               </div>
             </div>
           </div>
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingThree">
+              <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#conversion" aria-expanded="false" aria-controls="collapseThree">
+                  Conversion
+                </a>
+              </h4>
+            </div>
+            <div id="conversion" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+              <div class="panel-body" id="conversionOptions">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="col-md-12" style="margin-top: 10px">
-        <h6>States Reference</h5>
-          <div class="row demo-swatches-row">
-            <div class="swatches-col">
-              <div class="pallete-item">
-                <dl class="palette" style="border-radius: 100%; background-color: #34495e">
-                  <dt class="text-center" style="color: white">Initial</dt>
-                </dl>
-              </div>
-              <div class="pallete-item">
-                <dl class="palette" style="border-radius: 100%; background-color: #bdc3c7">
-                  <dt class="text-center" style="color: black">Normal</dt>
-                </dl>
-              </div>
-              <div class="pallete-item">
-                <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
-                  <dt class="text-center" style="color: black">Final</dt>
-                </dl>
-              </div>
-              <div class="pallete-item">
-                <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
-                  <dt class="text-center" style="color: white">Initial Final</dt>
-                </dl>
-              </div>
-            </div> <!-- /swatches items -->
+        <h6>States Reference</h6>
+        <div class="row demo-swatches-row">
+          <div class="swatches-col">
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #34495e">
+                <dt class="text-center" style="color: white">Initial</dt>
+              </dl>
+            </div>
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #bdc3c7">
+                <dt class="text-center" style="color: black">Normal</dt>
+              </dl>
+            </div>
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                <dt class="text-center" style="color: black">Final</dt>
+              </dl>
+            </div>
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                <dt class="text-center" style="color: white">Initial Final</dt>
+              </dl>
+            </div>
+          </div> <!-- /swatches items -->
+        </div>
+      </div>
+    </div>
+
+    <div id="edit" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Edit</h4>
+          </div>
+          <div id="modalContent" class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" onclick="Javascript:editar()" class="btn btn-primary">Save changes</button>
           </div>
         </div>
       </div>
-
-      <div id="edit" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-        <div class="modal-dialog modal-sm" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Edit</h4>
-            </div>
-            <div id="modalContent" class="modal-body">
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" onclick="Javascript:editar()" class="btn btn-primary">Save changes</button>
-            </div>
+    </div>
+    <div id="newConversion" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Conversion</h4>
+          </div>
+          <div id="conversionDiv" class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
-    </body>
+    </div>
+  </div>
+</body>
 
-    </html>
+</html>

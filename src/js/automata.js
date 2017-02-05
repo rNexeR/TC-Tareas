@@ -194,4 +194,74 @@ class Automaton{
 		}
 	}
 
+	isFinalState(str, finalStates){
+		let tokens = str.split(",");
+		for (var i = tokens.length - 1; i >= 0; i--) {
+			if (finalStates.includes(tokens[i]))
+				return true;
+		}
+		return false;
+	}
+
+	nfaToDfa(){
+		console.log("Converting NFA to DFA");
+		let table = new Array();
+		let cantSymbols = this.alphabet.length;
+		let root = this.states.filter(x=> x.root == true)[0];
+		let waitingState = new Array();
+
+		waitingState.push(root.label);
+
+		while(waitingState.length > 0){
+			let actual = waitingState[0];
+			//console.log(actual);
+			let rootsLabels = actual.split(",");
+
+			let rootsIds = new Array();
+			rootsLabels.forEach( x => rootsIds.push(this.states.filter( y => y.label == x)[0].id));
+
+			let nrow = new Array(cantSymbols);
+			nrow[0] = actual;
+
+			for (var i = 0; i < cantSymbols; i++) {
+				let transitions = this.transitions.filter(x => rootsIds.includes(x.from) && x.label == this.alphabet[i]);
+				let state = [];
+				transitions.forEach(x => state.push(this.states.filter( y => y.id == x.to)[0].label));
+				//state += "}";
+				state = removeDuplicates(state)
+				let stateLabel = "";
+				state.forEach(x => stateLabel += x.toString() + ",");
+				stateLabel = stateLabel.slice(0, stateLabel.length-1);
+
+				nrow[i+1] = stateLabel;
+				if(state != "" && (table.filter(x => x[0] == stateLabel).length == 0 && !waitingState.includes(stateLabel))){
+					//alert("pushing " + stateLabel + " to waiting list");
+					waitingState.push(stateLabel);
+				}
+			}
+			table.push(nrow);
+
+			waitingState.splice(0, 1);
+		}
+
+		
+		//console.log(table);
+
+		let finalStates = this.states.filter(x => x.final == true).map(x => x.label);
+
+		let dfa_states = [];
+		table.forEach( x => dfa_states.push({id: table.indexOf(x), label: x[0], root: table.indexOf(x) ==0, final: this.isFinalState(x[0], finalStates)}));
+
+		let dfa_transitions = [];
+		let nid = 0;
+		for (var i = 0; i < table.length; i++) {
+			let frm = i;
+			this.alphabet.forEach( x => dfa_transitions.push({id: nid++, from: frm, to: table.map(y => y[0]).indexOf(table[i][this.alphabet.indexOf(x)+1]), label: x}));
+		}
+		//console.log("dfa_states: \n", dfa_states);
+		//console.log("dfa_transitions: \n", dfa_transitions);
+
+		return new Automaton("dfa", dfa_states, dfa_transitions, this.alphabet);
+		//table.forEach(x => dfa_transitions.push({id: id++, from: table.indexOf(x), to: dfa.states.map(x => x.label).indexOf(x[])}))
+	}
 }

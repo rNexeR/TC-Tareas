@@ -141,29 +141,35 @@ setType =function(){
     return false;
 }
 
+convertToDFA = function(){
+    let new_dfa = this.automata.nfaToDfa();
+    renderConversion(new_dfa);
+}
+
 window.onload = function(){
   // create an array with statess
   let states = [], transitions = [];
   states = [
-  {id: 0, label: 'root'},
-  {id: 1, label: '0'},
-  {id: 2, label: '00', final: true},
-  {id: 3, label: '1'},
-  {id: 4, label: '11', final: true},
+  {id: 0, label: 'a'},
+  {id: 1, label: 'b'},
+  {id: 2, label: 'c'},
+  {id: 3, label: 'd'},
+  {id: 4, label: 'e', final: true}
   ];
 
     // create an array with transitions
     transitions = [
-    {from: 0, to: 0, label: '1'},
     {from: 0, to: 0, label: '0'},
-    {from: 1, to: 2, label: '0'},
     {from: 0, to: 1, label: '0'},
+    {from: 0, to: 2, label: '0'},
+    {from: 0, to: 3, label: '0'},
     {from: 0, to: 3, label: '1'},
-    {from: 3, to: 4, label: '1'},
-    {from: 2, to: 2, label: '0'},
-    {from: 4, to: 4, label: '0'},
-    {from: 2, to: 2, label: '1'},
-    {from: 4, to: 4, label: '1'},
+    {from: 0, to: 4, label: '0'},
+    {from: 0, to: 4, label: '1'},
+    {from: 1, to: 4, label: '1'},
+    {from: 1, to: 2, label: '0'},
+    {from: 2, to: 1, label: '1'},
+    {from: 3, to: 4, label: '0'},
     ];
 
     automata = new Automaton("nfa", states, transitions, ['0', '1']);
