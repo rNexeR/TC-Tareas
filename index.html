@@ -35,7 +35,33 @@
     </h1>
     <div class="row" style="width: 100%">
       <div class="col-md-6">
-        <div id="mynetwork"></div>
+        <div id="mynetwork"></div><div class="col-md-12" style="margin-top: 10px">
+        <h6>States Reference</h6>
+        <div class="row demo-swatches-row">
+          <div class="swatches-col">
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #34495e">
+                <dt class="text-center" style="color: white">Initial</dt>
+              </dl>
+            </div>
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #bdc3c7">
+                <dt class="text-center" style="color: black">Normal</dt>
+              </dl>
+            </div>
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                <dt class="text-center" style="color: black">Final</dt>
+              </dl>
+            </div>
+            <div class="pallete-item">
+              <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                <dt class="text-center" style="color: white">Initial Final</dt>
+              </dl>
+            </div>
+          </div> <!-- /swatches items -->
+        </div>
+      </div>
       </div>
       <div class="col-md-6">
         <h4 class="text-center" id="title"></h4>
@@ -57,6 +83,7 @@
                     <select id="automataType" class="form-control" data-toggle="select">
                       <option value="dfa" selected>DFA</option>
                       <option value="nfa">NFA</option>
+                      <option value="nfa-e">NFA-Epsilon</option>
                     </select>
                   </div>
                   <button type="submit" class="btn btn-primary">Set Type</button>
@@ -75,7 +102,7 @@
             </div>
             <div id="alphabet" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
               <div class="panel-body">
-                <ul id="alphabet-list" class="list-group col-md-6">
+                <ul id="alphabet-list" class="list-group col-md-12">
                 </ul>
                 <form onsubmit="return addAlphabet()" class="form-inline col-md-12">
                   <div class="form-group">
@@ -97,7 +124,7 @@
             </div>
             <div id="nodes" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
               <div class="panel-body">
-                <ul id="states-list" class="list-group col-md-6">
+                <ul id="states-list" class="list-group col-md-12">
                 </ul>
                 <form onsubmit="return addState()" class="form-inline col-md-12">
                   <div class="form-group">
@@ -126,7 +153,7 @@
             </div>
             <div id="transitions" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
               <div class="panel-body">
-                <ul id="transitions-list" class="list-group col-md-6">
+                <ul id="transitions-list" class="list-group col-md-12">
                 </ul>
                 <form onsubmit="return addTransition()" class="form-inline col-md-12">
                   <div class="form-group">
@@ -153,7 +180,7 @@
               <div class="panel-body">
                 <form onsubmit="return evaluateAutomata()" class="form-inline col-md-12">
                   <div class="form-group">
-                    <input type="text" class="form-control" id="str" placeholder="String to evaluate" required>
+                    <input type="text" class="form-control" id="str" placeholder="String to evaluate">
                   </div>
                   <button type="submit" class="btn btn-primary">Evaluate</button>
                   <div class="form-group" style="font-size: 25px" id="result">
@@ -176,34 +203,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="col-md-12" style="margin-top: 10px">
-        <h6>States Reference</h6>
-        <div class="row demo-swatches-row">
-          <div class="swatches-col">
-            <div class="pallete-item">
-              <dl class="palette" style="border-radius: 100%; background-color: #34495e">
-                <dt class="text-center" style="color: white">Initial</dt>
-              </dl>
-            </div>
-            <div class="pallete-item">
-              <dl class="palette" style="border-radius: 100%; background-color: #bdc3c7">
-                <dt class="text-center" style="color: black">Normal</dt>
-              </dl>
-            </div>
-            <div class="pallete-item">
-              <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
-                <dt class="text-center" style="color: black">Final</dt>
-              </dl>
-            </div>
-            <div class="pallete-item">
-              <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
-                <dt class="text-center" style="color: white">Initial Final</dt>
-              </dl>
-            </div>
-          </div> <!-- /swatches items -->
         </div>
       </div>
     </div>
@@ -231,7 +230,10 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Conversion</h4>
           </div>
-          <div id="conversionDiv" class="modal-body">
+          <div class="modal-body">
+            <div id="conversionDiv"></div>
+            <div id="conversionModalContent" class="modal-body">
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

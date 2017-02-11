@@ -5,7 +5,7 @@ renderAlphabetSection = function(){
     let target = document.getElementById('alphabet-list');
     let html = '';
     for(l in automata.alphabet){
-        html += `<li class="list-group-item"><button onclick="deleteAlphabet(`+l+`)" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>`+automata.alphabet[l]+'</li>';
+        html += `<li class="list-group-item col-md-6"><button onclick="deleteAlphabet(`+l+`)" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>`+automata.alphabet[l]+'</li>';
     }
     target.innerHTML = html;
 }
@@ -14,7 +14,7 @@ renderStatesSection = function(){
     let target = document.getElementById('states-list');
     let html = '';
     for(l in automata.states){
-        html += `<li class="list-group-item"><button onclick="deleteState(`+l+`)" type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="fui-cross" aria-hidden="true"></span></button><button onclick="renderStateEdit(`+l+`)" type="button" class="close" aria-label="Edit"><span class="fui-new" aria-hidden="true"></span></button>`+automata.states[l].label+'</li>';
+        html += `<li class="list-group-item col-md-6"><button onclick="deleteState(`+l+`)" type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="fui-cross" aria-hidden="true"></span></button><button onclick="renderStateEdit(`+l+`)" type="button" class="close" aria-label="Edit"><span class="fui-new" aria-hidden="true"></span></button>`+automata.states[l].label+'</li>';
     }
     target.innerHTML = html;
 
@@ -48,7 +48,7 @@ renderTransitionsSection = function(){
     let target = document.getElementById('transitions-list');
     let html = '';
     for(l in automata.transitions){
-        html += `<li class="list-group-item"><button onclick="deleteTransition(`+l+`)" type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="fui-cross" aria-hidden="true"></span></button><button onclick="renderTransitionEdit(`+l+`)" type="button" class="close" aria-label="Edit"><span class="fui-new" aria-hidden="true"></span></button>From: `+automata.transitions[l].from+`   To: `+automata.transitions[l].to+`   Label: `+automata.transitions[l].label+'</li>';
+        html += `<li class="list-group-item col-md-6"><button onclick="deleteTransition(`+l+`)" type="button" class="close" data-dismiss="modal" aria-label="Close"><span class="fui-cross" aria-hidden="true"></span></button><button onclick="renderTransitionEdit(`+l+`)" type="button" class="close" aria-label="Edit"><span class="fui-new" aria-hidden="true"></span></button>From: `+automata.states.find(x => x.id == automata.transitions[l].from).label+`   To: `+automata.states.find(x => x.id == automata.transitions[l].to).label+`   Label: `+automata.transitions[l].label+'</li>';
     }
     target.innerHTML = html;
 }
@@ -78,19 +78,22 @@ renderAutomataType = function(){
 renderConversionOptions = function(){
     let target = document.getElementById('conversionOptions');
     let html = "";
-    if(automata.type == "nfa"){
-        html += `<button onclick="convertToDFA()" class="btn btn-inverse">to DFA</button>`;
+    if(automata.type == "nfa" ){
+        html += `<button onclick="convertNFAToDFA()" class="btn btn-inverse">to DFA</button>`;
+    }else if(automata.type == "nfa-e"){
+        html += `<button onclick="convertNFAToDFA()" class="btn btn-inverse">to DFA</button>`;
     }
 
     target.innerHTML = html;
 }
 
-renderConversion = function(convertedAutomata){
+renderConversion = function(){
+    let target = document.getElementById('conversionModalContent');
     let container = document.getElementById('conversionDiv');
 
     // provide the data in the vis format
-    let statesDS = new vis.DataSet(convertedAutomata.states);
-    let transitionsDS = new vis.DataSet(convertedAutomata.transitions);
+    let statesDS = new vis.DataSet(converted.states);
+    let transitionsDS = new vis.DataSet(converted.transitions);
 
     let data = {
         nodes: statesDS,
@@ -109,6 +112,7 @@ renderConversion = function(convertedAutomata){
     let conversion = new vis.Network(container, data, options);
     $('#newConversion').modal('show');
 
+    target.innerHTML = `<button class="btn btn-success" onclick="setConvertedToDefault()">Set as default</button>`;
 }
 
 renderHTML = function(){
