@@ -79,21 +79,9 @@ addTransition = function(){
     let to = parseInt(document.getElementById('toOptions').value);
     let label = document.getElementById('newTransition').value;
     if(automata.transitions.filter(x => x.from == frm && x.to == to && x.label == label).length == 0){
-
         if(!automata.addTransition(frm, to, label))
             return false;
-
-        let fid = automata.transitions.filter(x => x.from == frm && x.to == to);
-
-        if(fid.length == 1){
-            transitionsDS.add(automata.transitions[automata.transitions.length -1]);
-        }else{
-            let label = "";
-            fid.forEach(x => label += x.label + "/");
-            label = label.slice(0, label.length-1);
-            transitionsDS.update({id: fid[0].id, label: label})
-        }
-
+        transitionsDS.add(automata.transitions[automata.transitions.length -1]);
         this.renderTransitionsSection();
         console.log('Transition from ',frm, ' to ', to, ' label ', label, ' added');
         console.log(JSON.stringify(automata.transitions));
@@ -110,39 +98,23 @@ editTransition = function(pos){
     automata.transitions[pos].label = label;
     automata.transitions[pos].from = frm;
     automata.transitions[pos].to = to;
-    let fid = automata.transitions.filter(x => x.from == frm && x.to == to);
-
-    if(fid.length == 1){
-        transitionsDS.add(automata.transitions[automata.transitions.length -1]);
-    }else{
-        let label = "";
-        fid.forEach(x => label += x.label + "/");
-        label = label.slice(0, label.length-1);
-        transitionsDS.update({id: fid[0].id, label: label})
-    }
+    transitionsDS.update(automata.transitions[pos]);
     renderTransitionsSection();
 }
 
 deleteTransition = function(pos){
     if(confirm('Confirm deletion of Transition')){
-        let to_del = automata.transitions[pos];
-        console.log('Transition from ',to_del.from, ' to ', to_del.to, ' label ', to_del.label, ' added');
-        let fid = automata.transitions.find( x => x.from == to_del.from && x.to == to_del.to);
+        console.log('Transition from ',automata.transitions[pos].from, ' to ', automata.transitions[pos].to, ' label ', automata.transitions[pos].label, ' added');
+        this.deleteVisTransition([automata.transitions[pos].id]);
         automata.transitions.splice(pos,1);
-        let nid = automata.transitions.filter( x => x.from == to_del.from && x.to == to_del.to);
-        
-        transitionsDS.remove({id: fid.id});
-        let label = "";
-        nid.forEach(x => label += x.label + "/");
-        label = label.slice(0, label.length-1);
-        if(nid.length > 0){
-            transitionsDS.add({id: nid[0].id, from: to_del.from, to: to_del.to, label: label})
-        }
         this.renderTransitionsSection();
-
+        
     }
 }
 
+deleteVisTransition = function(ids){
+    ids.forEach(x => transitionsDS.remove({id: x}));
+}
 
 deleteVisState = function(ids){
     ids.forEach(x => statesDS.remove({id: x}));
@@ -175,10 +147,55 @@ convertNFAToDFA = function(){
     renderConversion();
 }
 
+convertDFAToRegExp = function(){
+    let regexp = this.automata.dfaToRegExp();
+    renderConversionRegexp(regexp);
+}
+
 setConvertedToDefault = function(){
     this.automata = this.converted;
     this.network.setData({nodes: converted.states, edges: converted.transitions});
     $('#newConversion').modal('hide');
+    renderHTML();
+}
+
+setDfaExample = function(){
+    let states = [
+    {id: 0, label: 'root'},
+    {id: 1, label: '0'},
+    {id: 2, label: '01', final: true},
+    {id: 3, label: '010', final: true}
+    ];
+    // create an array with transitions
+    let transitions = [
+    {from: 0, to: 0, label: '1'},
+    {from: 0, to: 1, label: '0'},
+    {from: 1, to: 2, label: '1'},
+    {from: 2, to: 3, label: '0'}
+    ];
+    automata = new Automaton("dfa", states, transitions, ['0', '1']);
+
+    let container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    statesDS = new vis.DataSet(states);
+    transitionsDS = new vis.DataSet(transitions);
+
+    let data = {
+        nodes: statesDS,
+        edges: transitionsDS
+    };
+    //let options = {};
+    let options = {
+        "nodes": {
+          "shapeProperties": {
+              "interpolation": false
+          }
+      }
+  };
+
+    // initialize your network!
+    network = new vis.Network(container, data, options);
     renderHTML();
 }
 
@@ -281,7 +298,22 @@ setNfaeExample = function(){
     renderHTML();
 }
 
+automataFromRegExp = function(){
+    try{
+        let regexp = document.getElementById('regexp').value;
+        if(regexp != ""){
+            converted = automata.fromRegExp(regexp);
+            renderConversion();
+        }
+    }catch(e){
+        alert(e);
+    }
+    return false;
+}
+
 window.onload = function(){
+    // let output = peg$parse('(1+2).2*');
+    // alert(JSON.stringify(output));
     let states = [], transitions = [];
     let container = document.getElementById('mynetwork');
 

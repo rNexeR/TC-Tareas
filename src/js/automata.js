@@ -5,8 +5,6 @@ class Automaton{
 			return;
 		this.type = type;
 		this.states = states;
-		if(states.length-1 > 0)
-			this.states[states.length-1].final = true;
 		this.alphabet = alphabet;
 
 		if(this.checkAlphabet(transitions)){
@@ -92,17 +90,17 @@ class Automaton{
 	transformStates(){
 		for (var i = this.states.length - 1; i >= 0; i--) {
 			this.states[i].color = '#bdc3c7';
-			if(i == 0){
+			delete this.states[i].font;
+			if(this.states[i].root){
 				this.states[i].color = '#34495e';
 				this.states[i].font = {color: 'white'};
-				this.states[i].root = true;
 			}
 			if(this.states[i].final){
 				this.states[i].final = true;
 				this.states[i].color = '#2ecc71';
 			}
 			this.states[i].label = this.states[i].label; 
-			this.states[i].id = i;
+			//this.states[i].id = i;
 		}
 		this.nextStateId = this.states.length;
 	}
@@ -257,11 +255,15 @@ class Automaton{
 	}
 
 	isFinalState(str, finalStates){
+
 		let tokens = str.split(",");
 		for (var i = tokens.length - 1; i >= 0; i--) {
-			if (finalStates.includes(tokens[i]))
+			if (finalStates.includes(tokens[i])){
+				console.log("IFS: ", str, true);
 				return true;
+			}
 		}
+		console.log("IFS: ", str, false);
 		return false;
 	}
 
@@ -328,12 +330,13 @@ class Automaton{
 		console.log("Converting NFA to DFA");
 		let table = this.getNfaTable();
 
-		if(this.type == "nfa-e")
-			console.log(JSON.stringify(table));
+		console.log(JSON.stringify(table));
 		
 		//console.log(table);
 
 		let finalStates = this.states.filter(x => x.final == true).map(x => x.label);
+		console.log("FS: ", finalStates, this.isFinalState("c", finalStates));
+
 
 		let dfa_states = [];
 		table.forEach( x => dfa_states.push({id: table.indexOf(x), label: x[0], root: table.indexOf(x) ==0, final: this.isFinalState(x[0], finalStates)}));
@@ -351,5 +354,260 @@ class Automaton{
 
 		return new Automaton("dfa", dfa_states, dfa_transitions, this.alphabet);
 		//table.forEach(x => dfa_transitions.push({id: id++, from: table.indexOf(x), to: dfa.states.map(x => x.label).indexOf(x[])}))
+	}
+
+	clone(){
+		let states = JSON.parse(JSON.stringify(this.states));
+		let transitions = JSON.parse(JSON.stringify(this.transitions));
+		let alphabet = JSON.parse(JSON.stringify(this.alphabet));
+		return new Automaton(this.type, states, transitions, alphabet);
+	}
+
+	removeFinalStatesDistinct(finalStateId){
+		let copy = this.clone();
+		let finalStates = copy.states.filter( x => x.final == true);
+		finalStates.forEach(function(state){
+			if(state.id != finalStateId)
+				delete state.final
+		});
+		return copy;
+	}
+
+	transitionsLabelToRegExp(){
+		let states = this.states;
+		let oldTransitions = JSON.parse(JSON.stringify(this.transitions));
+		this.transitions = [];
+		let transitions = this.transitions;
+
+		states.forEach(function(state){
+			let from = state.id;
+			states.forEach(function(st){
+				let to = st.id;
+				let currentTransitions = oldTransitions.filter( x => x.from == from && x.to == to).map(x => x.label).join("+");
+				if (currentTransitions != ""){
+					transitions.push({id: transitions.length, from: from, to: to, label: currentTransitions})
+					//console.log(currentTransitions);
+				}
+			});
+		});
+		//console.log(this.transitions);
+	}
+
+	toRegExp(){
+		let fn = this.states.find(x => x.final == true);
+		console.log("Final state: ", JSON.stringify(fn));
+		console.log("\n\ntoRegExp states: ",JSON.stringify(this.states));
+		console.log("\n\ntoRegExp transitions: ",JSON.stringify(this.transitions));
+		let root = this.states.find( x => x.root == true);
+		this.transitionsLabelToRegExp();
+		let states = this.states;
+		let transitions = this.transitions;
+		let nextId = Math.max(...this.transitions.map(x => x.id))+1;
+		states.forEach(function(state, index){
+			if(state.final != true && state.root != true){
+				console.log("deleting state: ", state.id, state.label);
+				let transitionsToMe = transitions.filter( x => x.to == state.id && x.from != state.id);
+				let transitionsFromMe = transitions.filter( x => x.from == state.id && x.to != state.id);
+				let transitionsFromMeToMe = transitions.find(x => x.from == state.id && x.to == state.id);
+				if(transitionsFromMeToMe == undefined){
+					transitionsFromMeToMe = {label: ""};
+				}else{
+					transitionsFromMeToMe.label = ".(" + transitionsFromMeToMe.label + ")*";
+				}
+				transitionsToMe.forEach(function(tt){
+					transitionsFromMe.forEach( function(tf){
+						let t = {id: nextId++, from: tt.from, label: tt.label + transitionsFromMeToMe.label};
+						t.to = tf.to;
+						t.label += "." + tf.label;
+						transitions.push(t);
+						console.log("Adding transition: ", t.from, t.to, t.label);
+						console.log("Deleting transition: ", tf.to, tf.from, tf.label);
+						let pos = transitions.indexOf(tf);
+						if(pos >= 0)
+							transitions.splice(pos, 1);
+					})
+					console.log("deleting transition: ", tt.from, tt.to, tt.label);
+					let pos = transitions.indexOf(tt);
+					if(pos >= 0)
+						transitions.splice(pos, 1);
+					if(transitionsFromMeToMe.label != ""){
+						console.log("deleting recursive transition from to state: ", state.id, state.label);
+						let pos = transitions.indexOf(transitions.find(x => x.from == state.id && x.to == state.id));
+						if(pos >= 0)
+							transitions.splice(pos, 1);
+					}
+				})
+				states = states.filter( x => x != state);
+			}
+		});
+
+		this.states = this.states.filter(x => x.root == true || x.final == true);
+		let regexp = "";
+		if(this.states.length == 2){
+			let rootCycle = this.transitions.find(x => x.from == root.id && x.to == root.id);
+			if(rootCycle == undefined){
+				rootCycle = {label: ""}
+			}else{
+				rootCycle.label = rootCycle.label;
+			}
+
+			regexp += rootCycle.label;
+			
+			let rootTransitions = this.transitions.filter(x => x.from == root.id && x.to != root.id).map(x => x.label).join('+');
+			regexp += rootTransitions;
+			
+			let final = this.states.find(x => x.final == true);
+			let finalCycle = this.transitions.find(x => x.from == final.id && x.to == final.id);
+			if(finalCycle == undefined){
+				finalCycle = {label: ""};
+			}else{
+				finalCycle.label = 	"." + finalCycle.label;
+			}
+			regexp += finalCycle.label;
+
+			let recursive = this.transitions.find(x => x.from == final.id && x.to == root.id);
+			if(recursive != undefined){
+				regexp = "(" + regexp + "." + recursive.label + ")*." + rootTransitions + finalCycle.label;
+
+			}
+		}else if(this.states.length == 1){
+			let rootCycle = this.transitions.find(x => x.from == root.id && x.to == root.id);
+			if(rootCycle == undefined){
+				rootCycle = {label: ""}
+			}else{
+				rootCycle.label = rootCycle.label + "+";
+			}
+
+			regexp += rootCycle.label;
+		}
+		console.log(this.states.length, " RE: ", regexp);
+		return regexp;
+	}
+
+	dfaToRegExp(){
+		let finalStates = this.states.filter( x => x.final == true);
+		let automataParts = [];
+		let regexp = "";
+
+		finalStates.forEach(x => automataParts.push(this.removeFinalStatesDistinct(x.id)));
+		console.log(automataParts);
+		automataParts.forEach(x => regexp += "(" + x.toRegExp() + ")" + " + ");
+		regexp = regexp.slice(0, regexp.length-2);
+		console.log(regexp);
+		return regexp;
+	}
+
+	fromRegExp(regexp = ""){
+		let stateId = 0;
+		let transitionId = 0;
+		let tree = peg$parse(regexp);
+		alert(JSON.stringify(tree));
+
+		let automata = this.fromRegExpAux(tree, stateId, transitionId);
+		alert("Conversion: " + JSON.stringify(automata));
+		automata.transformStates();
+		return automata;
+	}
+
+	fromRegExpAux(tree, nextStateId, nextTransitionId){
+		if(tree.name == "kleene"){
+
+			let ret = this.fromRegExpAux(tree.expression, nextStateId, nextTransitionId);
+			nextStateId = ret.nextStateId;
+			nextTransitionId = ret.nextTransitionId;
+
+			let retFinal = ret.states.find(x => x.final == true);
+			let retRoot = ret.states.find(x => x.root == true);
+
+			ret.states.forEach( x => {x.root = false; x.final = false});
+
+			ret.nextStateId = nextStateId+2;
+			ret.nextTransitionId = nextTransitionId+4;
+
+			ret.states.push({id: nextStateId++, label: "q"+(nextStateId-1), root: true});
+			ret.states.push({id: nextStateId++, label: "q"+(nextStateId-1), final: true});
+
+			ret.addTransition(retFinal.id, retRoot.id, this.epsilon);
+			ret.addTransition(nextStateId-2, retRoot.id, this.epsilon);
+			ret.addTransition(retFinal.id, nextStateId-1, this.epsilon);
+			ret.addTransition(nextStateId-2, nextStateId-1, this.epsilon);
+
+			return ret;
+
+		}else if(tree.name == "pipe"){
+			let a1 = this.fromRegExpAux(tree.left, nextStateId, nextTransitionId);
+			nextStateId = a1.nextStateId;
+			nextTransitionId = a1.nextTransitionId;
+			let a2 = this.fromRegExpAux(tree.right, nextStateId, nextTransitionId);
+			nextStateId = a2.nextStateId;
+			nextTransitionId = a2.nextTransitionId;
+
+			let a1Final = a1.states.find(x => x.final == true);
+			let a1Root = a1.states.find(x => x.root == true);
+			let a2Root = a2.states.find(x => x.root == true);
+			let a2Final = a2.states.find(x => x.final == true);
+			
+			let states = removeDuplicates(a1.states.concat(a2.states));
+			let transitions = removeDuplicates(a1.transitions.concat(a2.transitions));
+			let alphabet = removeDuplicates(a1.alphabet.concat(a2.alphabet));
+			
+			let ret = new Automaton("nfa-e", states, transitions, alphabet);
+			ret.states.forEach( x => {x.root = false; x.final = false});
+			console.log(ret.states);
+			ret.nextStateId = nextStateId+2;
+			ret.nextTransitionId = nextTransitionId+4;
+
+			ret.states.push({id: nextStateId++, label: "q"+(nextStateId-1), root: true});
+			ret.states.push({id: nextStateId++, label: "q"+(nextStateId-1), final: true});
+
+
+			ret.addTransition(nextStateId-2, a1Root.id, this.epsilon);
+			ret.addTransition(nextStateId-2, a2Root.id, this.epsilon);
+
+			ret.addTransition(a1Final.id, nextStateId-1, this.epsilon);
+			ret.addTransition(a2Final.id, nextStateId-1, this.epsilon);
+
+			return ret;
+
+		}else if(tree.name == "concat"){
+			let a1 = this.fromRegExpAux(tree.left, nextStateId, nextTransitionId);
+			nextStateId = a1.nextStateId;
+			nextTransitionId = a1.nextTransitionId;
+			let a2 = this.fromRegExpAux(tree.right, nextStateId, nextTransitionId);
+			nextStateId = a2.nextStateId;
+			nextTransitionId = a2.nextTransitionId;
+
+			let a1Final = a1.states.find(x => x.final == true);
+			let a2Root = a2.states.find(x => x.root == true);
+
+			a1.states.forEach( x => x.final = false);
+			a2.states.forEach( x => x.root = false);
+			
+			let states = removeDuplicates(a1.states.concat(a2.states));
+			let transitions = removeDuplicates(a1.transitions.concat(a2.transitions));
+			let alphabet = removeDuplicates(a1.alphabet.concat(a2.alphabet));
+			
+			let ret = new Automaton("nfa-e", states, transitions, alphabet);
+			ret.nextStateId = nextStateId;
+			ret.nextTransitionId = nextTransitionId;
+
+			ret.addTransition(a1Final.id, a2Root.id, this.epsilon);
+
+			return ret;
+		}else if(tree.name == "character"){
+			alert("creating new automata, character: " + tree.value);
+			
+			let states = [];
+			states.push({id: nextStateId++, label: "q"+(nextStateId-1), root: true});
+			states.push({id: nextStateId++, label: "q"+(nextStateId-1), final: true});
+
+			let transitions = [];
+			transitions.push({id: nextTransitionId++, from: nextStateId-2, to: nextStateId-1, label: tree.value});
+
+			let ret = new Automaton("nfa-e", states, transitions, [tree.value])
+			ret.nextStateId = nextStateId;
+			ret.nextTransitionId = nextTransitionId;
+			return ret;
+		}
 	}
 }

@@ -78,18 +78,33 @@ renderAutomataType = function(){
 renderConversionOptions = function(){
     let target = document.getElementById('conversionOptions');
     let html = "";
-    if(automata.type == "nfa" ){
+    if(automata.type == "nfa" || automata.type == "nfa-e" ){
         html += `<button onclick="convertNFAToDFA()" class="btn btn-inverse">to DFA</button>`;
-    }else if(automata.type == "nfa-e"){
-        html += `<button onclick="convertNFAToDFA()" class="btn btn-inverse">to DFA</button>`;
+    }else if(automata.type == "dfa"){
+        html += `<button onclick="convertDFAToRegExp()" class="btn btn-inverse">to RegExp</button>`;
     }
 
     target.innerHTML = html;
 }
 
+renderConversionRegexp = function(regexp){
+    let target = document.getElementById('conversionModalContent');
+    let container = document.getElementById('conversionDiv');
+    container.style.height = 0;
+    container.style.border = 0;
+
+    let html = '<h5>RegExp: <h6>'+regexp+'</h6></h5>';
+
+    target.innerHTML = html;
+    $('#newConversion').modal('show');
+}
+
 renderConversion = function(){
     let target = document.getElementById('conversionModalContent');
     let container = document.getElementById('conversionDiv');
+    container.style.height = "70%";
+    container.style.border = 1;
+
 
     // provide the data in the vis format
     let statesDS = new vis.DataSet(converted.states);
