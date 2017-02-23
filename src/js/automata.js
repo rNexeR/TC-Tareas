@@ -40,6 +40,7 @@ class Automaton{
 		}
 
 		this.states.push(state);
+		return state.id;
 	}
 
 	deleteState(pos){
@@ -263,7 +264,6 @@ class Automaton{
 				return true;
 			}
 		}
-		console.log("IFS: ", str, false);
 		return false;
 	}
 
@@ -278,7 +278,7 @@ class Automaton{
 		}else if(this.type == "nfa-e"){
 			let epsilonStatesIds = this.getClosure(root.id).map(x => x.label);
 			epsilonStatesIds.sort();
-			let rootLabel = root.label + ",";
+			let rootLabel = "";
 			epsilonStatesIds.forEach(x => rootLabel += x + ",");
 			rootLabel = rootLabel.slice(0, rootLabel.length-1);
 			waitingState.push(rootLabel);
@@ -303,7 +303,7 @@ class Automaton{
 				transitions.forEach(x => state.push(this.states.find( y => y.id == x.to).label));
 				if(this.type== "nfa-e"){
 					let epsilonStates = [];
-					transitions.forEach( x => epsilonStates = epsilonStates.concat(this.getClosure(x.id)));
+					transitions.forEach( x => epsilonStates = epsilonStates.concat(this.getClosure(x.to)));
 					epsilonStates.forEach(x => state.push(x.label));
 				}
 				//state += "}";
@@ -351,6 +351,8 @@ class Automaton{
 		dfa_transitions = dfa_transitions.filter(x => x.from >=0 && x.to >= 0);
 		//console.log("dfa_states: \n", dfa_states);
 		//console.log("dfa_transitions: \n", dfa_transitions);
+
+		dfa_states.forEach( x=> x.label = x.label.replace(",", "-"));
 
 		return new Automaton("dfa", dfa_states, dfa_transitions, this.alphabet);
 		//table.forEach(x => dfa_transitions.push({id: id++, from: table.indexOf(x), to: dfa.states.map(x => x.label).indexOf(x[])}))
@@ -419,6 +421,9 @@ class Automaton{
 						let t = {id: nextId++, from: tt.from, label: tt.label + transitionsFromMeToMe.label};
 						t.to = tf.to;
 						t.label += "." + tf.label;
+						if(t.to == t.from){
+							t.label = "(" + t.label + ")*";
+						}
 						transitions.push(t);
 						console.log("Adding transition: ", t.from, t.to, t.label);
 						console.log("Deleting transition: ", tf.to, tf.from, tf.label);
@@ -448,7 +453,7 @@ class Automaton{
 			if(rootCycle == undefined){
 				rootCycle = {label: ""}
 			}else{
-				rootCycle.label = rootCycle.label;
+				rootCycle.label = "("+rootCycle.label + ")*";
 			}
 
 			regexp += rootCycle.label;

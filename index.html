@@ -3,6 +3,8 @@
 <head>
   <script type="text/javascript" src="./src/js/vis.js"></script>
   <script type="text/javascript" src="./src/js/regular-expression.js"></script>
+  <script type="text/javascript" src="./src/js/examples.js"></script>
+  <script type="text/javascript" src="./src/js/automatas-methods.js"></script>
   <script type="text/javascript" src="./src/js/automata.js"></script>
   <script type="text/javascript" src="./src/js/automata-vis.js"></script>
   <script type="text/javascript" src="./src/js/renderer.js"></script>
@@ -69,7 +71,7 @@
 
       <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
-        <div class="panel panel-default">
+        <!-- <div class="panel panel-default">
           <div class="panel-heading" role="tab" id="headingOne">
             <h4 class="panel-title">
               <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#fromRE" aria-expanded="false" aria-controls="alphabet">
@@ -87,6 +89,22 @@
                   <input type="submit" class="btn btn-primary" value="Convert">
                 </div>
               </form>
+            </div>
+          </div>
+        </div> -->
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingThree">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#json" aria-expanded="false" aria-controls="collapseThree">
+                JSON
+              </a>
+            </h4>
+          </div>
+          <div id="json" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+            <div class="panel-body">
+              <textarea id="fromJSON" class="col-md-12" rows="8"></textarea>
+              <button onclick="createAutomata()" class="btn btn-inverse" style="margin-top: 5px">From JSON</button>
+              <button onclick="createJSON()" class="btn btn-inverse" style="margin-top: 5px">To JSON</button>
             </div>
           </div>
         </div>
@@ -223,6 +241,37 @@
           </div>
           <div id="conversion" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
             <div class="panel-body" id="conversionOptions">
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingThree">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#actions" aria-expanded="false" aria-controls="collapseThree">
+                Actions
+              </a>
+            </h4>
+          </div>
+          <div id="actions" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+            <div class="panel-body">
+              <button onclick="joinAutomatas()" class="btn btn-inverse">Join</button>
+              <button onclick="intersectAutomatas()" class="btn btn-inverse">Intersection</button>
+              <button onclick="complementAutomata()" class="btn btn-inverse">Complement</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingThree">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#options" aria-expanded="false" aria-controls="collapseThree">
+                Options
+              </a>
+            </h4>
+          </div>
+          <div id="options" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+            <div class="panel-body">
+              <button onclick="storeAutomata()" class="btn btn-inverse">Push Automata</button>
+              <button onclick="clearAutomata()" class="btn btn-inverse">Clear Automata</button>
             </div>
           </div>
         </div>

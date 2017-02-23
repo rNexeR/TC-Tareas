@@ -1,5 +1,6 @@
 var automata = new Automaton("dfa",[],[],[]);
-var newwork = {};
+var automataList = [];
+var network = {};
 var statesDS = [];
 var transitionsDS = [];
 var converted = {};
@@ -112,6 +113,7 @@ deleteTransition = function(pos){
     }
 }
 
+//Vis functions to update transitions and states
 deleteVisTransition = function(ids){
     ids.forEach(x => transitionsDS.remove({id: x}));
 }
@@ -119,6 +121,8 @@ deleteVisTransition = function(ids){
 deleteVisState = function(ids){
     ids.forEach(x => statesDS.remove({id: x}));
 }
+
+
 
 evaluateAutomata = function(){
     try{
@@ -154,147 +158,25 @@ convertDFAToRegExp = function(){
 
 setConvertedToDefault = function(){
     this.automata = this.converted;
-    this.network.setData({nodes: converted.states, edges: converted.transitions});
+    statesDS = new vis.DataSet(automata.states);
+    transitionsDS = new vis.DataSet(automata.transitions);
+    let data = {
+        nodes: statesDS,
+        edges: transitionsDS
+    };
+    //let options = {};
+    let options = {
+        "nodes": {
+          "shapeProperties": {
+              "interpolation": false
+          }
+      }
+  };
+
+    // initialize your network!
+    let container = document.getElementById('mynetwork');
+    network = new vis.Network(container, data, options);
     $('#newConversion').modal('hide');
-    renderHTML();
-}
-
-setDfaExample = function(){
-    let states = [
-    {id: 0, label: 'root'},
-    {id: 1, label: '0'},
-    {id: 2, label: '01', final: true},
-    {id: 3, label: '010', final: true}
-    ];
-    // create an array with transitions
-    let transitions = [
-    {from: 0, to: 0, label: '1'},
-    {from: 0, to: 1, label: '0'},
-    {from: 1, to: 2, label: '1'},
-    {from: 2, to: 3, label: '0'}
-    ];
-    automata = new Automaton("dfa", states, transitions, ['0', '1']);
-
-    let container = document.getElementById('mynetwork');
-
-    // provide the data in the vis format
-    statesDS = new vis.DataSet(states);
-    transitionsDS = new vis.DataSet(transitions);
-
-    let data = {
-        nodes: statesDS,
-        edges: transitionsDS
-    };
-    //let options = {};
-    let options = {
-        "nodes": {
-          "shapeProperties": {
-              "interpolation": false
-          }
-      }
-  };
-
-    // initialize your network!
-    network = new vis.Network(container, data, options);
-    renderHTML();
-}
-
-setNfaExample = function(){
-    let states = [], transitions = [];
-    states = [
-    {id: 0, label: 'a'},
-    {id: 1, label: 'b'},
-    {id: 2, label: 'c'},
-    {id: 3, label: 'd'},
-    {id: 4, label: 'e', final: true}
-    ];
-
-    // create an array with transitions
-    transitions = [
-    {from: 0, to: 0, label: '0'},
-    {from: 0, to: 1, label: '0'},
-    {from: 0, to: 2, label: '0'},
-    {from: 0, to: 3, label: '0'},
-    {from: 0, to: 3, label: '1'},
-    {from: 0, to: 4, label: '0'},
-    {from: 0, to: 4, label: '1'},
-    {from: 1, to: 4, label: '1'},
-    {from: 1, to: 2, label: '0'},
-    {from: 2, to: 1, label: '1'},
-    {from: 3, to: 4, label: '0'},
-    ];
-
-    automata = new Automaton("nfa", states, transitions, ['0', '1']);
-    //this.renderHTML();
-
-    // create a network
-    let container = document.getElementById('mynetwork');
-
-    // provide the data in the vis format
-    statesDS = new vis.DataSet(states);
-    transitionsDS = new vis.DataSet(transitions);
-
-    let data = {
-        nodes: statesDS,
-        edges: transitionsDS
-    };
-    //let options = {};
-    let options = {
-        "nodes": {
-          "shapeProperties": {
-              "interpolation": false
-          }
-      }
-  };
-
-    // initialize your network!
-    network = new vis.Network(container, data, options);
-    renderHTML();
-}
-
-setNfaeExample = function(){
-    let states = [], transitions = [];
-    states = [
-    {id: 0, label: 'q0'},
-    {id: 1, label: 'q1'},
-    {id: 2, label: 'q2'},
-    {id: 4, label: 'q3', final: true}
-    ];
-
-    // create an array with transitions
-    transitions = [
-    {from: 0, to: 1, label: '1'},
-    {from: 1, to: 0, label: '#'},
-    {from: 1, to: 2, label: '0'},
-    {from: 2, to: 3, label: '1'},
-    {from: 2, to: 3, label: '#'},
-    ];
-
-    automata = new Automaton("nfa-e", states, transitions, ['0', '1']);
-    //this.renderHTML();
-
-    // create a network
-    let container = document.getElementById('mynetwork');
-
-    // provide the data in the vis format
-    statesDS = new vis.DataSet(states);
-    transitionsDS = new vis.DataSet(transitions);
-
-    let data = {
-        nodes: statesDS,
-        edges: transitionsDS
-    };
-    //let options = {};
-    let options = {
-        "nodes": {
-          "shapeProperties": {
-              "interpolation": false
-          }
-      }
-  };
-
-    // initialize your network!
-    network = new vis.Network(container, data, options);
     renderHTML();
 }
 
@@ -311,11 +193,93 @@ automataFromRegExp = function(){
     return false;
 }
 
+storeAutomata = function(){
+    automataList.push(automata);
+    if(automataList.length > 2){
+        automataList.shift();
+    }
+    alert("Automata saved");
+}
+
+clearAutomata = function(){
+    automata = new Automaton("dfa",[],[],[]);
+    statesDS = new vis.DataSet(automata.states);
+    transitionsDS = new vis.DataSet(automata.transitions);
+    let data = {
+        nodes: statesDS,
+        edges: transitionsDS
+    };
+    //let options = {};
+    let options = {
+        "nodes": {
+          "shapeProperties": {
+              "interpolation": false
+          }
+      }
+  };
+
+    // initialize your network!
+    let container = document.getElementById('mynetwork');
+    network = new vis.Network(container, data, options);
+    //this.network.setData({nodes: automata.states, edges: automata.transitions});
+    renderHTML();
+}
+
+createAutomata = function(){
+    let json = document.getElementById('fromJSON').value;
+    let obj = JSON.parse(json);
+    converted = new Automaton(obj.type, obj.states, obj.transitions, obj.alphabet);
+    setConvertedToDefault();
+}
+
+createJSON = function(){
+    let obj = {};
+    obj.type = automata.type;
+    obj.states = automata.states;
+    obj.transitions = automata.transitions;
+    obj.alphabet = automata.alphabet;
+    document.getElementById('fromJSON').value = JSON.stringify(obj);
+}
+
+joinAutomatas = function(){
+    if(automataList.length == 2){
+        converted = join(automataList[0], automataList[1]);
+        setConvertedToDefault();
+    }
+}
+
+intersetAutomatas = function(){
+    if(automataList.length == 2){
+        converted = intersection(automataList[0], automataList[1]);
+        setConvertedToDefault();
+    }
+}
+
+complementAutomata = function(){
+    converted = complement(automata);
+    setConvertedToDefault();
+}
+
+testUnion = function(){
+    let json = `{"type":"dfa","states":[{"id":0,"label":"q0","root":true,"final":false,"color":"#34495e","font":{"color":"white"}},{"id":1,"label":"q1","root":false,"final":false,"color":"#bdc3c7"},{"id":2,"label":"q2","root":false,"final":true,"color":"#2ecc71"},{"id":3,"label":"q3","root":false,"final":true,"color":"#2ecc71"}],"transitions":[{"id":0,"from":0,"to":1,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":1,"from":1,"to":2,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":2,"from":1,"to":1,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":3,"from":2,"to":3,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"}],"alphabet":["0","1"]}`;
+    let obj = JSON.parse(json);
+    let a1 = new Automaton(obj.type, obj.states, obj.transitions, obj.alphabet);
+
+    json = `{"type":"dfa","states":[{"id":0,"label":"root","root":true,"color":"#34495e","font":{"color":"white"}},{"id":1,"label":"0","color":"#bdc3c7"},{"id":2,"label":"01","final":true,"color":"#2ecc71"},{"id":3,"label":"010","final":true,"color":"#2ecc71"}],"transitions":[{"from":0,"to":0,"label":"1","id":0,"font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"from":0,"to":1,"label":"0","id":1,"font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"from":1,"to":2,"label":"1","id":2,"font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"from":2,"to":3,"label":"0","id":3,"font":{"align":"top"},"arrows":"to","color":"#f1c40f"}],"alphabet":["0","1"]}`;
+    obj = JSON.parse(json);
+    let a2 = new Automaton(obj.type, obj.states, obj.transitions, obj.alphabet);
+
+    converted = intersection(a1, a2);
+    setConvertedToDefault();
+}
+
 window.onload = function(){
     // let output = peg$parse('(1+2).2*');
     // alert(JSON.stringify(output));
-    let states = [], transitions = [];
-    let container = document.getElementById('mynetwork');
+/*    let hi = "hello";
+alert(hi.substr(1));*/
+let states = [], transitions = [];
+let container = document.getElementById('mynetwork');
 
     // provide the data in the vis format
     statesDS = new vis.DataSet(states);
