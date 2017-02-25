@@ -260,6 +260,11 @@ complementAutomata = function(){
     setConvertedToDefault();
 }
 
+minimizeAutomata = function(){
+    converted = automata.minimize();
+    setConvertedToDefault();
+}
+
 testUnion = function(){
     let json = `{"type":"dfa","states":[{"id":0,"label":"q0","root":true,"final":false,"color":"#34495e","font":{"color":"white"}},{"id":1,"label":"q1","root":false,"final":false,"color":"#bdc3c7"},{"id":2,"label":"q2","root":false,"final":true,"color":"#2ecc71"},{"id":3,"label":"q3","root":false,"final":true,"color":"#2ecc71"}],"transitions":[{"id":0,"from":0,"to":1,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":1,"from":1,"to":2,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":2,"from":1,"to":1,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":3,"from":2,"to":3,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"}],"alphabet":["0","1"]}`;
     let obj = JSON.parse(json);
@@ -269,7 +274,7 @@ testUnion = function(){
     obj = JSON.parse(json);
     let a2 = new Automaton(obj.type, obj.states, obj.transitions, obj.alphabet);
 
-    converted = intersection(a1, a2);
+    converted = union(a1, a2);
     setConvertedToDefault();
 }
 
