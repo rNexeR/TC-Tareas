@@ -20,7 +20,7 @@ class Automaton{
 		this.nextStateId = states.length;
 
 		this.nextTransitionId = transitions.length;
-		console.log("DFA created: \nNodes: ", JSON.stringify(this.states), "\nTransitions: ", JSON.stringify(this.transitions));
+		//console.log("DFA created: \nNodes: ", JSON.stringify(this.states), "\nTransitions: ", JSON.stringify(this.transitions));
 	}
 
 	//states
@@ -91,6 +91,9 @@ class Automaton{
 	transformStates(){
 		for (var i = this.states.length - 1; i >= 0; i--) {
 			this.states[i].color = '#bdc3c7';
+			this.states[i].root = this.states[i].root == undefined ? false : this.states[i].root;
+			this.states[i].final = this.states[i].final == undefined ? false : this.states[i].final;
+
 			delete this.states[i].font;
 			if(this.states[i].root){
 				this.states[i].color = '#34495e';
@@ -614,5 +617,189 @@ class Automaton{
 			ret.nextTransitionId = nextTransitionId;
 			return ret;
 		}
+	}
+
+	areEquivalents(stateA, stateB, table){
+		if(stateA.final != stateB.final)
+			return 'X';
+
+		let transitionsToSameState = true;
+		let transitionsA = this.transitions.filter(x => x.from == stateA.id);
+		let transitionsB = this.transitions.filter(x => x.from == stateB.id);
+
+		if(transitionsA.length != transitionsB.length)
+			return 'X';
+
+		let statesFromA = [];
+		let statesFromB = [];
+
+		for(let tA of transitionsA){
+			let tB = transitionsB.find(x => x.label == tA.label);
+			statesFromA.push(tA.to);
+			statesFromB.push(tB.to);
+			if(tA.to != tB.to)
+				transitionsToSameState = false;
+		}
+
+		if(table == null || transitionsToSameState)
+			return transitionsToSameState ? '/' : ' ';
+
+		let statesIds = this.states.map(x => x.id);
+		let result = '/';
+
+		/*
+		b [" "]
+		c ["X", "X"]
+		d [" ", " ", "X"]
+		e [" ", " ", "X", " "]
+		f [" ", " ", "X", "/", " "]
+		g [" ", " ", "X", " ", " ", " "]
+		h [" ", "/", "X", " ", " ", " ", " "]
+		  ["a", "b", "c", "d", "e", "f", "g"]
+		  */
+		//comparar con la tabla
+		for (var i = 0; i < statesFromA.length; i++) {
+			if(statesFromA[i] != statesFromB[i]){
+				let st1 = statesIds.indexOf(statesFromA[i]);
+				let st2 = statesIds.indexOf(statesFromB[i]);
+
+				let cell = "";
+				let xpos, ypos;
+
+				xpos = st1;
+				ypos = st2-1;
+				if(ypos >= table.length || xpos >= table[ypos].length){
+					let temp = xpos;
+					ypos = st1-1;
+					xpos = st2;
+				}
+
+				//console.log("{", this.states.find(x => x.id == st1).label, ",", this.states.find(x => x.id == st2).label, "}", "[", ypos, ",", xpos, "]");
+
+				cell = table[ypos][xpos];
+				if(cell == '/')
+					continue;
+				else
+					return cell;
+			}
+		}
+		return "/";
+	}
+
+	minimizeTableIsCompleted(table){
+		for (let i = 0; i < this.states.length -1; i++) {
+			for (var j = 0; j <= i; j++) {
+				if(table[i][j] == ' ')
+					return false;
+			}
+		}
+		return true;
+	}
+
+	getMinimizeTable(){
+		let table = [];
+		let h_legend = [];
+		for (let i = 1; i < this.states.length; i++) {
+			let row = [];
+			for (var j = 0; j < i; j++) {
+				let value = this.areEquivalents(this.states[i], this.states[j], null);
+				if(this.states[i].final == true || this.states[j].final == true)
+					value = 'X';
+				row.push(value);
+			}
+			console.log(i-1, this.states[i].label, row);
+			table.push(row);
+			h_legend.push(this.states[i-1].label);
+		}
+		console.log('     ', h_legend);
+		console.log('     ', Array.from(Array(this.states.length -1).keys()).map(x => x.toString()));
+
+		while(!this.minimizeTableIsCompleted(table)){
+			for (let i = 0; i < this.states.length -1; i++) {
+				for (var j = 0; j <= i; j++) {
+					if(table[i][j] == ' '){
+						let stA = this.states[i+1];
+						let stB = this.states[j];
+						table[i][j] = this.areEquivalents(stA, stB, table);
+					}
+				}
+				console.log(i, this.states[i+1].label, table[i]);
+			}
+			console.log('     ', h_legend);
+			console.log('     ', Array.from(Array(this.states.length -1).keys()).map(x => x.toString()));
+		}
+
+		return table;
+	}
+
+	getEquivalentsStates(table){
+		let equivalentsTemp = [];
+		for (let i = 0; i < this.states.length -1; i++) {
+			for (var j = 0; j <= i; j++) {
+				if(table[i][j] == '/'){
+					let stA = this.states[i+1];
+					let stB = this.states[j];
+					equivalentsTemp.push([stA.label, stB.label]);
+				}
+			}
+		}
+		return equivalentsTemp;
+	}
+
+	getEquivalents(stateLabel, equivalentsStates){
+		let equivalents = [];
+		for (var i = equivalentsStates.length - 1; i >= 0; i--) {
+			if(equivalentsStates[i].includes(stateLabel)){
+				equivalents = equivalents.concat(equivalentsStates[i]);
+			}
+		}
+		return equivalents;
+	}
+
+	minimize(){
+		let table = this.getMinimizeTable();
+		let equivalents = this.getEquivalentsStates(table);
+
+		let ret = new Automaton(this.type, [], [], this.alphabet);
+
+		for (let i = 0; i < this.states.length; i++) {
+			let current = this.states[i];
+			let equivalentsToCurrent = this.getEquivalents(current.label, equivalents);
+			equivalentsToCurrent.push(current.label);
+
+			equivalentsToCurrent = removeDuplicates(equivalentsToCurrent).sort();
+
+			if(equivalentsToCurrent.length == 1){
+				console.log("entro");
+				ret.addState(current.label, current.final);
+			}else{
+
+				let newStateLabel = equivalentsToCurrent.join(',');
+
+				if(ret.states.map(x => x.label).includes(newStateLabel))
+					continue;
+
+				ret.addState(newStateLabel, current.final);
+			}
+		}
+
+		for (let i = 0; i < this.transitions.length; i++) {
+			let current = this.transitions[i];
+			let stateFrom = this.states.find(x => x.id == current.from).label;
+			let stateTo = this.states.find(x => x.id == current.to).label;
+
+			console.log(stateFrom, stateTo);
+
+			let fromId = ret.states.find(x => x.label.split(',').includes(stateFrom)).id;
+			let toId = ret.states.find(x => x.label.split(',').includes(stateTo)).id;
+
+			if(ret.transitions.filter(x => x.to == toId && x.from == fromId && x.label == current.label) == 0){
+				console.log(fromId, toId, current.label);
+				ret.addTransition(fromId, toId, current.label);
+			}
+		}
+
+		return ret;
+
 	}
 }

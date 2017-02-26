@@ -278,6 +278,14 @@ testUnion = function(){
     setConvertedToDefault();
 }
 
+testMinimize = function(){
+    let json = `{"type":"dfa","states":[{"label":"a","color":"#34495e","id":0,"root":true,"font":{"color":"white"}},{"label":"b","color":"#bdc3c7","id":1},{"label":"c","color":"#2ecc71","id":2,"final":true},{"label":"d","color":"#bdc3c7","id":3},{"label":"e","color":"#bdc3c7","id":4},{"label":"f","color":"#bdc3c7","id":5},{"label":"g","color":"#bdc3c7","id":6},{"label":"h","color":"#bdc3c7","id":7}],"transitions":[{"id":0,"from":0,"to":1,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":1,"from":0,"to":5,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":2,"from":1,"to": 2,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":3,"from":1,"to":6,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":4,"from": 2,"to":0,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":5,"from": 2,"to": 2,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":6,"from":3,"to": 2,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":7,"from":3,"to":6,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":8,"from":4,"to":5,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":9,"from":4,"to":7,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":10,"from":5,"to":6,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":11,"from":5,"to": 2,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":12,"from":6,"to":6,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":13,"from":6,"to":4,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":14,"from":7,"to":6,"label":"0","font":{"align":"top"},"arrows":"to","color":"#f1c40f"},{"id":15,"from":7,"to": 2,"label":"1","font":{"align":"top"},"arrows":"to","color":"#f1c40f"}],"alphabet":["0","1"]}`;
+    let obj = JSON.parse(json);
+    converted = new Automaton(obj.type, obj.states, obj.transitions, obj.alphabet);
+    setConvertedToDefault();
+    minimizeAutomata();
+}
+
 window.onload = function(){
     // let output = peg$parse('(1+2).2*');
     // alert(JSON.stringify(output));
