@@ -623,7 +623,7 @@ class Automaton{
 		}
 	}
 
-	areEquivalents(stateA, stateB, table){
+	/*areEquivalents(stateA, stateB, table){
 		if(stateA.final != stateB.final)
 			return 'X';
 
@@ -651,7 +651,7 @@ class Automaton{
 		let statesIds = this.states.map(x => x.id);
 		let result = '/';
 
-		/*
+		
 		b [" "]
 		c ["X", "X"]
 		d [" ", " ", "X"]
@@ -660,7 +660,7 @@ class Automaton{
 		g [" ", " ", "X", " ", " ", " "]
 		h [" ", "/", "X", " ", " ", " ", " "]
 		  ["a", "b", "c", "d", "e", "f", "g"]
-		  */
+		  
 		//comparar con la tabla
 		for (var i = 0; i < statesFromA.length; i++) {
 			if(statesFromA[i] != statesFromB[i]){
@@ -688,7 +688,7 @@ class Automaton{
 			}
 		}
 		return "/";
-	}
+	}*/
 
 	minimizeTableIsCompleted(table){
 		for (let i = 0; i < this.states.length -1; i++) {
@@ -708,7 +708,7 @@ class Automaton{
 			for (var j = 0; j < i; j++) {
 				let value = this.areEquivalents(this.states[i], this.states[j]);
 				/*if(!(this.states[i].final && this.states[j].final))
-					value = 'X';*/
+				value = 'X';*/
 				row.push(value);
 			}
 			console.log(i-1, this.states[i].label, row);
@@ -736,18 +736,91 @@ class Automaton{
 		return table;
 	}
 
-	getEquivalentsStates(table){
-		let equivalentsTemp = [];
-		for (let i = 0; i < this.states.length -1; i++) {
-			for (var j = 0; j <= i; j++) {
-				if(table[i][j] == '/'){
-					let stA = this.states[i+1];
-					let stB = this.states[j];
-					equivalentsTemp.push([stA.label, stB.label]);
+	areEquivalents(stateA, stateB, visitted, equivalents, notEquivalents){
+		if(stateA.final != stateB.final)
+			return false;
+
+		let transitionsToSameState = true;
+		let transitionsA = this.transitions.filter(x => x.from == stateA.id);
+		let transitionsB = this.transitions.filter(x => x.from == stateB.id);
+
+		if(transitionsA.length != transitionsB.length)
+			return false;
+
+		let statesFromA = [];
+		let statesFromB = [];
+		let pair = [];
+
+		for(let tA of transitionsA){
+			let tB = transitionsB.find(x => x.label == tA.label);
+			statesFromA.push(tA);
+			statesFromB.push(tB);
+			let pA = this.states.find(x => x.id == tA.to);
+			let pB = this.states.find(x => x.id == tB.to);
+			pair.push([pA.label, pB.label].sort().join(','));
+			if(tA.to != tB.to)
+				transitionsToSameState = false;
+		}
+
+		if(transitionsToSameState)
+			return true;
+
+		for (var i = 0; i < statesFromA.length; i++) {
+			if(statesFromA[i] != statesFromB[i]){
+
+				let pA = this.states.find(x => x.id == statesFromA[i].to);
+				let pB = this.states.find(x => x.id == statesFromB[i].to);
+				
+				if(notEquivalents.includes(pair[i])){
+					return false;
+				}else if(visitted.includes(pair[i])){
+					continue;
+				}else{
+					visitted.push(pair[i]);
+					let eq = this.areEquivalents(pA, pB, visitted, equivalents, notEquivalents);
+					if(eq){
+						equivalents.push(pair[i]);
+					}else{
+						return false;
+					}
+					continue;
 				}
 			}
 		}
-		return equivalentsTemp;
+		return true;
+	}
+
+	getEquivalentsStates(table){
+		let equivalents = [];
+		let notEquivalents = [];
+
+		for (let i = 0; i < this.states.length -1; i++) {
+			for (var j = 0; j <= i; j++) {
+				let stA = this.states[i+1];
+				let stB = this.states[j];
+				if(this.states[i].final != this.states[j].final)
+					notEquivalents.push([stA.label, stB.label].sort().join(','))
+			}
+		}
+
+		for (let i = 0; i < this.states.length -1; i++) {
+			for (var j = 0; j <= i; j++) {
+				let stA = this.states[i+1];
+				let stB = this.states[j];
+				if(this.states[i].final == this.states[j].final){
+					let eq = this.areEquivalents(stA, stB, [], equivalents, notEquivalents);
+					if(eq){
+						equivalents.push([stA.label, stB.label].sort().join(','))
+						equivalents = removeDuplicates(equivalents);
+					}else{
+						notEquivalents.push([stA.label, stB.label].sort().join(','));
+						notEquivalents = removeDuplicates(notEquivalents);
+					}
+				}
+			}
+		}
+
+		return equivalents;
 	}
 
 	getEquivalents(stateLabel, equivalentsStates){
@@ -757,12 +830,13 @@ class Automaton{
 				equivalents = equivalents.concat(equivalentsStates[i]);
 			}
 		}
-		return equivalents;
+		return removeDuplicates(equivalents);
 	}
 
 	minimize(){
-		let table = this.getMinimizeTable();
-		let equivalents = this.getEquivalentsStates(table);
+		//let table = this.getMinimizeTable();
+		let equivalents = this.getEquivalentsStates();
+		console.log(equivalents);
 
 		let ret = new Automaton(this.type, [], [], this.alphabet);
 
@@ -775,10 +849,14 @@ class Automaton{
 
 			if(equivalentsToCurrent.length == 1){
 				console.log("entro");
-				ret.addState(current.label, current.final);
+				if(this.transitions.filter(x => x.to == current.id && x.from != current.id).length > 0 || (current.root == true || current.final == true))
+					ret.addState(current.label, current.final);
+				else
+					this.deleteState(this.states.indexOf(current));
 			}else{
 
-				let newStateLabel = equivalentsToCurrent.join(',');
+				let newStateLabel = removeDuplicates(equivalentsToCurrent.join(',').split(',')).sort().join(',');
+				console.log(newStateLabel);
 
 				if(ret.states.map(x => x.label).includes(newStateLabel))
 					continue;
