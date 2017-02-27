@@ -248,7 +248,7 @@ joinAutomatas = function(){
     }
 }
 
-intersetAutomatas = function(){
+intersectAutomatas = function(){
     if(automataList.length == 2){
         converted = intersection(automataList[0], automataList[1]);
         setConvertedToDefault();

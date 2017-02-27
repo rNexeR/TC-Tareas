@@ -98,10 +98,14 @@ class Automaton{
 			if(this.states[i].root){
 				this.states[i].color = '#34495e';
 				this.states[i].font = {color: 'white'};
+			}else{
+				this.states[i].root = false;
 			}
 			if(this.states[i].final){
 				this.states[i].final = true;
 				this.states[i].color = '#2ecc71';
+			}else{
+				this.states[i].final = false;
 			}
 			this.states[i].label = this.states[i].label; 
 			//this.states[i].id = i;
@@ -668,7 +672,7 @@ class Automaton{
 
 				xpos = st1;
 				ypos = st2-1;
-				if(ypos >= table.length || xpos >= table[ypos].length){
+				if(ypos >= table.length || (ypos == 0 && xpos > 0) || xpos >= table[ypos].length){
 					let temp = xpos;
 					ypos = st1-1;
 					xpos = st2;
@@ -702,9 +706,9 @@ class Automaton{
 		for (let i = 1; i < this.states.length; i++) {
 			let row = [];
 			for (var j = 0; j < i; j++) {
-				let value = this.areEquivalents(this.states[i], this.states[j], null);
-				if(this.states[i].final == true || this.states[j].final == true)
-					value = 'X';
+				let value = this.areEquivalents(this.states[i], this.states[j]);
+				/*if(!(this.states[i].final && this.states[j].final))
+					value = 'X';*/
 				row.push(value);
 			}
 			console.log(i-1, this.states[i].label, row);
