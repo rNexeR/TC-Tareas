@@ -90,6 +90,7 @@ class Automaton{
 
 	transformStates(){
 		for (var i = this.states.length - 1; i >= 0; i--) {
+			this.states[i].label = this.states[i].label.split(',').join('-');
 			this.states[i].color = '#bdc3c7';
 			this.states[i].root = this.states[i].root == undefined ? false : this.states[i].root;
 			this.states[i].final = this.states[i].final == undefined ? false : this.states[i].final;
@@ -753,6 +754,8 @@ class Automaton{
 
 		for(let tA of transitionsA){
 			let tB = transitionsB.find(x => x.label == tA.label);
+			if(tB == undefined)
+				return false;
 			statesFromA.push(tA);
 			statesFromB.push(tB);
 			let pA = this.states.find(x => x.id == tA.to);
@@ -849,10 +852,16 @@ class Automaton{
 
 			if(equivalentsToCurrent.length == 1){
 				console.log("entro");
+				/*if(this.transitions.filter(x => x.to == current.id && x.from != current.id).length > 0)
+					ret.addState(current.label, current.final);
+				else
+					this.deleteState(this.states.indexOf(current));*/
 				if(this.transitions.filter(x => x.to == current.id && x.from != current.id).length > 0 || (current.root == true || current.final == true))
 					ret.addState(current.label, current.final);
 				else
 					this.deleteState(this.states.indexOf(current));
+				/*if(this.transitions.filter(x => x.to == current.id && x.from != current.id).length > 0 )
+					ret.addState(current.label, current.final);*/
 			}else{
 
 				let newStateLabel = removeDuplicates(equivalentsToCurrent.join(',').split(',')).sort().join(',');
@@ -872,8 +881,13 @@ class Automaton{
 
 			console.log(stateFrom, stateTo);
 
-			let fromId = ret.states.find(x => x.label.split(',').includes(stateFrom)).id;
-			let toId = ret.states.find(x => x.label.split(',').includes(stateTo)).id;
+			let from = ret.states.find(x => x.label.split(',').includes(stateFrom));
+			let to = ret.states.find(x => x.label.split(',').includes(stateTo));
+
+			if(from == undefined || to == undefined)
+				continue;
+			let fromId = from.id;
+			let toId = to.id;
 
 			if(ret.transitions.filter(x => x.to == toId && x.from == fromId && x.label == current.label) == 0){
 				console.log(fromId, toId, current.label);

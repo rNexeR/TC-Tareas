@@ -157,7 +157,7 @@ convertDFAToRegExp = function(){
 }
 
 setConvertedToDefault = function(){
-    this.automata = this.converted;
+    this.automata = new Automaton(this.converted.type, this.converted.states, this.converted.transitions, this.converted.alphabet);
     statesDS = new vis.DataSet(automata.states);
     transitionsDS = new vis.DataSet(automata.transitions);
     let data = {
