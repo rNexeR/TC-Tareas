@@ -196,7 +196,12 @@ class PDA{
 			}
 			console.log("stack", JSON.stringify(stack));
 		}
+		console.log("root: ", root, "\n");
 		let finalStates = this.getClosure(root.id, stack[stack.length -1]);
+		if(root.constructor == Array){
+			finalStates = []
+			root.forEach(x => finalStates = finalStates.concat(this.getClosure(x.id, stack[stack.length -1])))
+		}
 		return finalStates.filter( x=> x.final == true).length > 0;
 	}
 
@@ -218,7 +223,7 @@ class PDA{
 		let states = [];
 		states.push(this.states.find(x => x.id == stateId));
 		checked.forEach(x => x != stateId ? states.push(this.states.find( y => y.id == x)) : null);
-		//console.log("Closure of ", stateId, "head ", head, ": ", JSON.stringify(states));
+		console.log("Closure of ", stateId, "head ", head, ": ", JSON.stringify(states));
 		return states;
 	}
 

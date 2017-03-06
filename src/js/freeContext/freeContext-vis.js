@@ -153,8 +153,10 @@ evaluateAutomata = function(){
 
         return false;
     }catch(e){
+        console.log(e);
         alert(e);
     }
+    return false
 }
 
 setConvertedToDefault = function(){
