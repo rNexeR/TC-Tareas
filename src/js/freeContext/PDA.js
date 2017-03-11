@@ -370,18 +370,21 @@ class PDA {
 		for (let prod of productionsSplitted) {
 			if (prod.includes("->")) {
 				let temp = prod.split("->");
-				productors.push({ name: temp[0].trim(" ") });
-				productors[productors.length - 1].returns = [];
+				if(!productors.map(x => x.name).includes(temp[0].trim(" "))){
+					console.log(productors);
+					productors.push({ name: temp[0].trim(" ") , returns: []});
+				}
 				for (let i = 1; i < temp.length; i++) {
+					let productorIndex = productors.map(x  => x.name).indexOf(temp[0]);
 					if (temp[i].length == 1) {
-						productors[productors.length - 1].returns.push([temp[i]]);
+						productors[productorIndex].returns.push([temp[i]]);
 					} else {
 						let values = [];
 
 						for (let j = 0; j < temp[i].length; j++) {
 							values.push(temp[i][j])
 						}
-						productors[productors.length - 1].returns.push(values);
+						productors[productorIndex].returns.push(values);
 					}
 				}
 			} else {
