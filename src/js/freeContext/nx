@@ -1,0 +1,45 @@
+console.log(print, "Evaluando " + ": ", str, " root: ", root.label, " stack: ", JSON.stringify(stack));
+
+		for (let i = 0; i < str.length; i++) {
+			if (!confirm("continue?"))
+				return false;
+
+			if (str == "") {
+				if (this.type == "Final State")
+					return root.final
+				else
+					return stack.length == 0
+			}
+
+			let head = "";
+			if (stack.length > 0)
+				head = stack[stack.length - 1]
+			let letra = str[i];
+			let nstr = str.slice(i + 1, str.length);
+
+			console.log(print, "state ", root.label, "str: ", str, "char: ", letra, "stack head ", head, "stack", JSON.stringify(stack));
+
+			if (!this.alphabet.includes(letra)) {
+				return false;
+			}
+
+			let transitions = this.getStateTransitions(root.id, [this.epsilon, letra], head);
+			if (transitions.length == 0) {
+				return false;
+			}
+			let stack_to_send = copy(stack);
+			let str_to_send = copy(nstr);
+			for (let tran of transitions) {
+				this.printTransition(print, tran);
+				stack_to_send.pop();
+				stack_to_send = stack_to_send.concat(this.reverse(tran.push));
+				if (tran.symbol == letra && tran.head == head){
+					root = this.findStateById(tran.to);
+					stack.pop();
+					stack = stack.concat(this.reverse(tran.push))
+				}else if (this.evaluate(str_to_send, this.findStateById(tran.to), stack_to_send, print + "\t"))
+					return true;
+			}
+			console.log(print, "->", stack)
+		}
+		return false;

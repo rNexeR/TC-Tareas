@@ -78,9 +78,28 @@
 					</div>
 					<div id="json" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
 						<div class="panel-body">
-							<textarea id="fromJSON" class="col-xs-12 col-md-12" rows="8"></textarea>
+							<textarea id="fromJSON" class="form-control col-xs-12 col-md-12" rows="8"></textarea>
 							<button onclick="createAutomata()" class="btn btn-inverse" style="margin-top: 5px">From JSON</button>
 							<button onclick="createJSON()" class="btn btn-inverse" style="margin-top: 5px">To JSON</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel panel-default">
+					<div class="panel-heading" role="tab" id="headingThree">
+						<h4 class="panel-title">
+							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#cfg" aria-expanded="false" aria-controls="collapseThree">
+								CFG
+							</a>
+						</h4>
+					</div>
+					<div id="cfg" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+						<div class="panel-body">
+							<textarea id="fromCFG" class="form-control col-xs-12 col-md-12" rows="8"></textarea>
+							<input type="text" class="form-control" id="terminals" placeholder="Terminals (a|b|...|c)" required>
+							<input type="text" class="form-control" id="principals" placeholder="Principals Terminals (a|b)" required>
+							<button onclick="createAutomataFromCFG()" class="btn btn-inverse" style="margin-top: 5px">From CFG</button>
+							<button onclick="createJSONFromCFG()" class="btn btn-inverse" style="margin-top: 5px">To CFG</button>
 						</div>
 					</div>
 				</div>

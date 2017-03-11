@@ -230,6 +230,26 @@ createJSON = function(){
     document.getElementById('fromJSON').value = JSON.stringify(obj);
 }
 
+testCFG = function(){
+    let cfg = `S->T+T
+      T->0
+      |1`.replace(" ", "");
+      let terminals = ["1", "0", "+"];
+      let principals = [];
+
+      converted = automata.fromCFG(cfg, terminals, principals);
+    setConvertedToDefault();
+}
+
+createAutomataFromCFG = function(){
+    let cfg = document.getElementById('fromCFG').value.replace(" ", "");
+    let terminals = document.getElementById('terminals').value.split("|");
+    let principals = document.getElementById('principals').value.split("|");
+
+    converted = automata.fromCFG(cfg, terminals, principals);
+    setConvertedToDefault();
+}
+
 window.onload = function(){
     // let output = peg$parse('(1+2).2*');
     // alert(JSON.stringify(output));
