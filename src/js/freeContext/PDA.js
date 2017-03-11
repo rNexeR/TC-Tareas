@@ -1,6 +1,7 @@
 class PDA{
 	constructor( states = [], transitions = [], alphabet = []){
 		this.epsilon = "#";
+		this.type = "Empty Stack";
 		if(!alphabet)
 			return;
 		this.states = states;
@@ -135,7 +136,7 @@ class PDA{
 			let head = stack[stack.length -1]
 			let letra = str[i];
 
-			console.log("head ",head);
+			console.log("root ", root.label, "head ",head, "stack", JSON.stringify(stack));
 			
 			if(!this.alphabet.includes(letra)){
 				return false;
@@ -152,9 +153,10 @@ class PDA{
 			//console.log("next state: " + JSON.stringify(nextState));
 
 			stack.pop()
+			head = stack[stack.length -1]
 
 			if(nextState.length > 1){
-				console.log("More than 1 next state found");
+				//console.log("More than 1 next state found");
 				for (let j = nextState.length - 1; j >= 0; j--) {
 					
 					let nroot = this.getClosure(nextState[j].to, head)
@@ -162,9 +164,17 @@ class PDA{
 
 					for (let k = nroot.length - 1; k >= 0; k--) {
 						let nstack = JSON.parse(JSON.stringify(stack))
-						nstack = nstack.concat(this.reverse(nextState[j].push))
+						if(nroot[k].id != nextState[j].to){
+							console.log("------> stack b: ", nstack);
+							nstack.pop();
+							let epsilonT = this.transitions.find(x => x.from == nextState[i].from && x.symbol == this.epsilon && x.head == head && x.to == nroot[k].id);
+							nstack.push(this.reverse(epsilonT.push))
+							console.log("------> stack a: ", nstack);
+						}else{
+							nstack = nstack.concat(this.reverse(nextState[j].push))
+						}
 						let result = this.evalNFA(nstr,nroot[k], nstack) == true;
-						console.log("next state["+j+"] returns: "+ result);
+						//console.log("next state["+j+"] returns: "+ result);
 						if(result){
 							return true;
 						}
@@ -179,30 +189,43 @@ class PDA{
 					return false;
 				else if(root.length == 1){
 					root = root[0];
-					console.log("width " + letra + " > " + root.label);
+					//console.log("width " + letra + " > " + root.label);
 					stack = stack.concat(this.reverse(nextState[0].push))
 				}else{
 					let nstr = str.slice(i+1, str.length);
 					for (let k = root.length - 1; k >= 0; k--) {
 						let nstack = JSON.parse(JSON.stringify(stack))
-						nstack = nstack.concat(this.reverse(nextState[0].push))
+						if(root[k].id != nextState[0].to){
+							console.log("------> stack b: ", nstack);
+							nstack.pop();
+							let epsilonT = this.transitions.find(x => x.from == nextState[0].from && x.head == head && x.symbol == this.epsilon && x.to == root[k].id);
+							nstack = nstack.concat(this.reverse(epsilonT.push))
+							console.log("------> stack a: ", nstack);
+						}else{
+							nstack = nstack.concat(this.reverse(nextState[0].push))
+						}
 						let result = this.evalNFA(nstr,root[k], nstack) == true;
-						console.log("root state["+k+"] returns: "+ result);
+						//console.log("root state["+k+"] returns: "+ result);
 						if(result){
 							return true;
 						}
 					}
 				}
 			}
-			console.log("stack", JSON.stringify(stack));
+			//console.log("stack", JSON.stringify(stack));
 		}
-		console.log("root: ", root, "\n");
-		let finalStates = this.getClosure(root.id, stack[stack.length -1]);
-		if(root.constructor == Array){
-			finalStates = []
-			root.forEach(x => finalStates = finalStates.concat(this.getClosure(x.id, stack[stack.length -1])))
+		//console.log("root: ", root, "\n");
+		if(this.type == "Final State"){
+			let finalStates = this.getClosure(root.id, stack[stack.length -1]);
+			if(root.constructor == Array){
+				finalStates = []
+				root.forEach(x => finalStates = finalStates.concat(this.getClosure(x.id, stack[stack.length -1])))
+			}
+			return finalStates.filter( x=> x.final == true).length > 0;
+		}else{
+			alert(JSON.stringify(stack));
+			return stack.length == 0;
 		}
-		return finalStates.filter( x=> x.final == true).length > 0;
 	}
 
 	reverse(array){
@@ -228,13 +251,25 @@ class PDA{
 	}
 
 	eval(str){
-		let root = this.getClosure(this.states.find(x => x.root == true).id, "Zo")
+		let originalRoot = this.states.find(x => x.root == true);
+		let root = this.getClosure(originalRoot.id, "Zo")
 
 		for (let i = root.length - 1; i >= 0; i--) {
-			if(this.evalNFA(str, root[i], JSON.parse('["Zo"]')) == true){
-				return true;
+			if(root[i].root){
+				if(this.evalNFA(str, root[i], JSON.parse('["Zo"]')) == true){
+					return true;
+				}
+			}else{
+				let nrootId = root[i].id;
+				let epsilonT = this.transitions.find(x=> x.from == originalRoot.id && x.symbol == this.epsilon && x.to == nrootId && x.head == "Zo");
+				let stack = [];
+				stack = stack.concat(this.reverse(epsilonT.push));
+				console.log(stack);
+				if(this.evalNFA(str, root[i], stack) == true){
+					return true;
+				}
 			}
-			
 		}
+		return false;
 	}
 }
