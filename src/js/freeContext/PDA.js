@@ -1,6 +1,7 @@
 class PDA {
 	constructor(states = [], transitions = [], alphabet = []) {
 		this.epsilon = "#";
+		this.stack_head = "Zo";
 		this.type = "Final State";
 		if (!alphabet)
 			return;
@@ -361,7 +362,7 @@ class PDA {
 
 	eval(str) {
 		let originalRoot = this.states.find(x => x.root == true);
-		return this.evaluate(str, originalRoot, ["Zo"], "");
+		return this.evaluate(str, originalRoot, [this.stack_head], "");
 	}
 
 	parseProductions(productions, terminals) {
@@ -370,12 +371,12 @@ class PDA {
 		for (let prod of productionsSplitted) {
 			if (prod.includes("->")) {
 				let temp = prod.split("->");
-				if(!productors.map(x => x.name).includes(temp[0].trim(" "))){
+				if (!productors.map(x => x.name).includes(temp[0].trim(" "))) {
 					console.log(productors);
-					productors.push({ name: temp[0].trim(" ") , returns: []});
+					productors.push({ name: temp[0].trim(" "), returns: [] });
 				}
 				for (let i = 1; i < temp.length; i++) {
-					let productorIndex = productors.map(x  => x.name).indexOf(temp[0]);
+					let productorIndex = productors.map(x => x.name).indexOf(temp[0]);
 					if (temp[i].length == 1) {
 						productors[productorIndex].returns.push([temp[i]]);
 					} else {
@@ -411,18 +412,138 @@ class PDA {
 		return productors;
 	}
 
-	fromCFG(productions, terminals, principals) {
+	fromCFG(productions, terminals) {
 		let ret = new PDA([], [], terminals);
-		console.log(productions, terminals, principals);
+		console.log(productions, terminals);
 
 		let productors = this.parseProductions(productions, terminals);
-		console.log("productos", productors);
+		if (productors.length == 0)
+			return ret
+		console.log("productors", productors);
 
 		ret.addState("q0", false);
 
-		for(let prod of productors)
-			for(let value of prod.returns)
-				ret.addTransition(0,0,this.epsilon, prod.name, value)
+		for (let prod of productors)
+			for (let value of prod.returns)
+				ret.addTransition(0, 0, this.epsilon, prod.name, value)
+		for (let term of terminals)
+			ret.addTransition(0, 0, term, term, [])
+
+		ret.type = "Empty Stack";
+		ret.stack_head = productors[0].name;
+
+		return ret;
+	}
+
+	toCFG_p1() {
+		let ret = "";
+		let root = this.states.find(x => x.root);
+		if (this.type == "Final State") {
+			let finalStates = this.states.filter(x => x.final);
+			for (let state of finalStates) {
+				let production = root.label + " " + this.stack_head + " " + state.label;
+				ret += "A->[" + production + "]\n"
+				this.productions.push("[" + production + "]");
+			}
+		} else {
+			for (let state of this.states) {
+				let production = root.label + " " + this.stack_head + " " + state.label;
+				ret += "A->[" + production + "]\n"
+				this.productions.push("[" + production + "]");
+			}
+		}
+
+		return ret
+	}
+
+	toCFG_p2() {
+		let ret = ""
+
+		for (let transition of this.transitions) {
+			if (transition.push.length == 0) {
+				let from = this.findStateById(transition.from).label;
+				let to = this.findStateById(transition.to).label;
+				ret += "[" + from + " " + transition.head + " " + to + "]->" + transition.symbol + "\n";
+				this.productions.push("[" + from + " " + transition.head + " " + to + "]");
+			}
+		}
+
+		return ret
+	}
+
+	toCFG_p3() {
+		let ret = ""
+
+		for(let transition of this.transitions){
+			if(transition.push.length > 0){
+				let m = transition.push.length
+				let permut = this.permut(m);
+				let from = this.findStateById(transition.from).label;
+				for(let row of permut){
+					console.log(row);
+					ret += "[" + from + " " + transition.head + " " + row[m-1] + "]" + "->" + transition.symbol;
+
+					this.productions.push("[" + from + " " + transition.head + " " + row[m-1] + "]");
+
+					for(let i = 0; i < m; i++){
+						let p1 = from;
+						if(i > 0)
+							p1 = row[i-1];
+						let p2 = row[i];
+						
+
+						ret += "[" + p1 + " " + transition.push[i] + " " + p2 + "]"
+						this.productions.push("[" + p1 + " " + transition.push[i] + " " + p2 + "]")
+					}
+
+					ret += "\n"; 
+				}
+			}
+		}
+
+		return ret
+	}
+
+	permut(columns) {
+		let states_count = this.states.length;
+		let rows_count = Math.pow(states_count, columns);
+		let states_label = this.states.map(x => x.label);
+
+		let ret = [];
+		for (let i = 0; i < rows_count; i++) {
+			ret.push([])
+			for (let j = 0; j < columns; j++) {
+				ret[i].push("")
+			}
+		}
+
+		for (let i = 0; i < columns; i++) {
+			let incidences = Math.pow(states_count, columns - (i + 1));
+			let current_state = 0;
+			for (let j = 0; j < rows_count; j++) {
+				if (j > 0 && j % incidences == 0)
+					current_state++;
+				if (current_state >= states_count)
+					current_state = 0;
+				ret[j][i] = states_label[current_state];
+			}
+		}
+
+		return ret;
+	}
+
+	toCFG() {
+		this.productions = [];
+		let ret = "";
+		ret += this.toCFG_p1();
+		ret += this.toCFG_p2();
+		ret += this.toCFG_p3();
+
+		this.productions = removeDuplicates(this.productions);
+		let current_prod = 66;
+		for(let prod of this.productions){
+			ret = ret.split(prod).join(String.fromCharCode(current_prod++));
+		}
 
 		return ret;
 	}

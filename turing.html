@@ -1,0 +1,199 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="./src/js/vis.js"></script>
+    <script type="text/javascript" src="./src/js/utils.js"></script>
+    <script type="text/javascript" src="./src/js/jquery.min.js"></script>
+    <script type="text/javascript" src="./src/js/bootstrap.js"></script>
+
+    <script type="text/javascript" src="./src/js/turing/turing.js"></script>
+    <script type="text/javascript" src="./src/js/turing/turing-vis.js"></script>
+    <script type="text/javascript" src="./src/js/turing/renderer.js"></script>
+
+    <link href="./src/css/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <link href="./src/css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <link href="./src/css/demo.css" rel="stylesheet" type="text/css" />
+    <link href="./src/css/flat-ui.css" rel="stylesheet" type="text/css" />
+
+
+    <title>Turing Machine</title>
+    <style type="text/css">
+        #mynetwork,
+        #conversionDiv {
+            width: 100%;
+            height: 70%;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1 class="demo-logo text-center">
+            Turing Machine
+        </h1>
+        <div class="row" style="width: 100%">
+            <div class="col-md-6">
+                <div id="mynetwork"></div>
+                <div class="col-md-12" style="margin-top: 10px">
+                    <h6>States Reference</h6>
+                    <div class="row demo-swatches-row">
+                        <div class="swatches-col">
+                            <div class="pallete-item">
+                                <dl class="palette" style="border-radius: 100%; background-color: #34495e">
+                                    <dt class="text-center" style="color: white">Initial</dt>
+                                </dl>
+                            </div>
+                            <div class="pallete-item">
+                                <dl class="palette" style="border-radius: 100%; background-color: #bdc3c7">
+                                    <dt class="text-center" style="color: black">Normal</dt>
+                                </dl>
+                            </div>
+                            <div class="pallete-item">
+                                <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                                    <dt class="text-center" style="color: black">Final</dt>
+                                </dl>
+                            </div>
+                            <div class="pallete-item">
+                                <dl class="palette" style="border-radius: 100%; background-color: #2ecc71">
+                                    <dt class="text-center" style="color: white">Initial Final</dt>
+                                </dl>
+                            </div>
+                        </div>
+                        <!-- /swatches items -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <h4 class="panel-title">
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#json" aria-expanded="false" aria-controls="collapseThree">
+								JSON
+							</a>
+                            </h4>
+                        </div>
+                        <div id="json" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                            <div class="panel-body">
+                                <textarea id="fromJSON" class="form-control col-xs-12 col-md-12" rows="8"></textarea>
+                                <button onclick="createAutomata()" class="btn btn-inverse" style="margin-top: 5px">From JSON</button>
+                                <button onclick="createJSON()" class="btn btn-inverse" style="margin-top: 5px">To JSON</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#alphabet" aria-expanded="false"
+                                    aria-controls="alphabet">
+								Alphabet
+							</a>
+                            </h4>
+                        </div>
+                        <div id="alphabet" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                            <div class="panel-body">
+                                <ul id="alphabet-list" class="list-group col-md-12">
+                                </ul>
+                                <form onsubmit="return addAlphabet()" class="form-inline col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" maxlength="1" class="form-control" id="newSymbol" placeholder="Symbol" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingTwo">
+                            <h4 class="panel-title">
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#nodes" aria-expanded="false" aria-controls="collapseTwo">
+								States
+							</a>
+                            </h4>
+                        </div>
+                        <div id="nodes" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                            <div class="panel-body">
+                                <ul id="states-list" class="list-group col-md-12">
+                                </ul>
+                                <form onsubmit="return addState()" class="form-inline col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="newState" placeholder="Label" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="checkbox">
+                                            <label>
+											<input type="checkbox" id="isFinal"> Final
+										</label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <h4 class="panel-title">
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#transitions" aria-expanded="false"
+                                    aria-controls="collapseThree">
+								Transitions
+							</a>
+                            </h4>
+                        </div>
+                        <div id="transitions" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                            <div class="panel-body">
+                                <ul id="transitions-list" class="list-group col-md-12">
+                                </ul>
+                                <form onsubmit="return addTransition()" class="form-inline col-md-12">
+                                    <div class="form-group">
+                                        <select id='fromOptions' class="form-control" data-toggle="select">
+									    </select>
+                                        <select id="toOptions" class="form-control" data-toggle="select">
+									    </select>
+                                        <input type="text" class="form-control" id="symbol" placeholder="Symbol" required>
+                                        <input type="text" class="form-control" id="write" placeholder="Write" required>
+                                        <!--<input type="text" class="form-control" id="direction" placeholder="Direction" required>-->
+                                        <select id="direction" class="form-control" data-toggle="select">
+                                            <option value="<-">Left</option>
+                                            <option value="->">Right</option>
+									    </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <h4 class="panel-title">
+                                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#evaluations" aria-expanded="false"
+                                    aria-controls="collapseThree">
+								Evaluation
+							</a>
+                            </h4>
+                        </div>
+                        <div id="evaluations" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                            <div class="panel-body">
+                                <form onsubmit="return evaluateAutomata()" class="form-inline col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="str" placeholder="String to evaluate">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Evaluate</button>
+                                    <div class="form-group" style="font-size: 25px" id="result">
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

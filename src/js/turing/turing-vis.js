@@ -1,4 +1,4 @@
-var automata = new PDA([], [], []);
+var automata = new Turing([], [], []);
 var automataList = [];
 var network = {};
 var statesDS = [];
@@ -47,7 +47,7 @@ addState = function () {
 editState = function (pos) {
     let label = document.getElementById('stateLabel').value;
     automata.states[pos].label = label;
-    statesDS.update(automata.states[pos]);
+    statesDS.uTuringte(automata.states[pos]);
     renderStatesSection();
 }
 
@@ -80,16 +80,13 @@ addTransition = function () {
 
         let frm = parseInt(document.getElementById('fromOptions').value);
         let to = parseInt(document.getElementById('toOptions').value);
-        let symbol = document.getElementById('symbolTransition').value;
-        let head = document.getElementById('headTransition').value;
-        let push = [];
-
-        if (document.getElementById('pushTransition').value != "")
-            push = document.getElementById('pushTransition').value.split('|')
+        let symbol = document.getElementById('symbol').value;
+        let direction = document.getElementById('direction').value;
+        let write = document.getElementById('write').value;
 
         let has = automata.transitions.filter(x => x.from == frm && x.to == to);
 
-        if (!automata.addTransition(frm, to, symbol, head, push))
+        if (!automata.addTransition(frm, to, symbol, write, direction))
             return false;
         if (has.length == 0) {
             transitionsDS.add(automata.transitions[automata.transitions.length - 1]);
@@ -117,7 +114,7 @@ editTransition = function (pos) {
     automata.transitions[pos].label = label;
     automata.transitions[pos].from = frm;
     automata.transitions[pos].to = to;
-    transitionsDS.update(automata.transitions[pos]);
+    transitionsDS.uTuringte(automata.transitions[pos]);
     renderTransitionsSection();
 }
 
@@ -131,7 +128,7 @@ deleteTransition = function (pos) {
     }
 }
 
-//Vis functions to update transitions and states
+//Vis functions to uTuringte transitions and states
 deleteVisTransition = function (ids) {
     ids.forEach(x => transitionsDS.remove({ id: x }));
 }
@@ -160,7 +157,7 @@ evaluateAutomata = function () {
 }
 
 setConvertedToDefault = function () {
-    this.automata = new PDA(this.converted.states, this.converted.transitions, this.converted.alphabet);
+    this.automata = new Turing(this.converted.states, this.converted.transitions, this.converted.alphabet);
     statesDS = new vis.DataSet(automata.states);
     transitionsDS = new vis.DataSet(automata.transitions);
     let data = {
@@ -192,7 +189,7 @@ storeAutomata = function () {
 }
 
 clearAutomata = function () {
-    automata = new PDA("dfa", [], [], []);
+    automata = new Turing("dfa", [], [], []);
     statesDS = new vis.DataSet(automata.states);
     transitionsDS = new vis.DataSet(automata.transitions);
     let data = {
@@ -218,7 +215,7 @@ clearAutomata = function () {
 createAutomata = function () {
     let json = document.getElementById('fromJSON').value;
     let obj = JSON.parse(json);
-    converted = new PDA(obj.states, obj.transitions, obj.alphabet);
+    converted = new Turing(obj.states, obj.transitions, obj.alphabet);
     setConvertedToDefault();
 }
 
@@ -228,31 +225,6 @@ createJSON = function () {
     obj.transitions = automata.transitions;
     obj.alphabet = automata.alphabet;
     document.getElementById('fromJSON').value = JSON.stringify(obj);
-}
-
-testCFG = function () {
-    let cfg = `S->T+T
-      T->0
-      |1`.replace(" ", "");
-    let terminals = ["1", "0", "+"];
-
-    converted = automata.fromCFG(cfg, terminals);
-    setConvertedToDefault();
-}
-
-createAutomataFromCFG = function () {
-    let cfg = document.getElementById('fromCFG').value.replace(" ", "");
-    let terminals = document.getElementById('terminals').value.split("|");
-
-    converted = automata.fromCFG(cfg, terminals);
-    setConvertedToDefault();
-}
-
-convertToCFG = function(){
-    let result = automata.toCFG();
-    document.getElementById('fromCFG').value = result;
-    document.getElementById('terminals').value = automata.alphabet.join("|");
-    return false;
 }
 
 window.onload = function () {

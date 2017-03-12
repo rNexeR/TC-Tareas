@@ -32,13 +32,14 @@
 
 
 	<div>
-		<h1 class="demo-logo text-center">
-			Free Context Languages
-			<small>PDA, GLC</small>
-		</h1>
-		<div class="row" style="width: 100%">
-			<div class="col-md-6">
-				<div id="mynetwork"></div><div class="col-md-12" style="margin-top: 10px">
+	<h1 class="demo-logo text-center">
+		Free Context Languages
+		<small>PDA, GLC</small>
+	</h1>
+	<div class="row" style="width: 100%">
+		<div class="col-md-6">
+			<div id="mynetwork"></div>
+			<div class="col-md-12" style="margin-top: 10px">
 				<h6>States Reference</h6>
 				<div class="row demo-swatches-row">
 					<div class="swatches-col">
@@ -62,7 +63,8 @@
 								<dt class="text-center" style="color: white">Initial Final</dt>
 							</dl>
 						</div>
-					</div> <!-- /swatches items -->
+					</div>
+					<!-- /swatches items -->
 				</div>
 			</div>
 		</div>
@@ -97,9 +99,8 @@
 						<div class="panel-body">
 							<textarea id="fromCFG" class="form-control col-xs-12 col-md-12" rows="8"></textarea>
 							<input type="text" class="form-control" id="terminals" placeholder="Terminals (a|b|...|c)" required>
-							<input type="text" class="form-control" id="principals" placeholder="Principals Terminals (a|b)" required>
 							<button onclick="createAutomataFromCFG()" class="btn btn-inverse" style="margin-top: 5px">From CFG</button>
-							<button onclick="createJSONFromCFG()" class="btn btn-inverse" style="margin-top: 5px">To CFG</button>
+							<button onclick="convertToCFG()" class="btn btn-inverse" style="margin-top: 5px">To CFG</button>
 						</div>
 					</div>
 				</div>
@@ -107,7 +108,8 @@
 				<div class="panel panel-default">
 					<div class="panel-heading" role="tab" id="headingOne">
 						<h4 class="panel-title">
-							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#alphabet" aria-expanded="false" aria-controls="alphabet">
+							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#alphabet" aria-expanded="false"
+								aria-controls="alphabet">
 								Alphabet
 							</a>
 						</h4>
@@ -147,7 +149,7 @@
 										<label>
 											<input type="checkbox" id="isFinal"> Final
 										</label>
-									</div>  
+									</div>
 								</div>
 								<button type="submit" class="btn btn-primary">Add</button>
 							</form>
@@ -158,7 +160,8 @@
 				<div class="panel panel-default">
 					<div class="panel-heading" role="tab" id="headingThree">
 						<h4 class="panel-title">
-							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#transitions" aria-expanded="false" aria-controls="collapseThree">
+							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#transitions" aria-expanded="false"
+								aria-controls="collapseThree">
 								Transitions
 							</a>
 						</h4>
@@ -185,7 +188,8 @@
 				<div class="panel panel-default">
 					<div class="panel-heading" role="tab" id="headingThree">
 						<h4 class="panel-title">
-							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#evaluations" aria-expanded="false" aria-controls="collapseThree">
+							<a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#evaluations" aria-expanded="false"
+								aria-controls="collapseThree">
 								Evaluation
 							</a>
 						</h4>
@@ -204,7 +208,7 @@
 						</div>
 					</div>
 				</div>
-        <!-- <div class="panel panel-default">
+				<!-- <div class="panel panel-default">
           <div class="panel-heading" role="tab" id="headingThree">
             <h4 class="panel-title">
               <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#conversion" aria-expanded="false" aria-controls="collapseThree">
@@ -217,9 +221,9 @@
             </div>
           </div>
       </div> -->
-  </div>
-</div>
-</div>
+			</div>
+		</div>
+	</div>
 
 
 
