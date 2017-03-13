@@ -488,7 +488,7 @@ class PDA {
 			return ret
 		console.log("productors", productors);
 
-		ret.addState("q0", false);
+		ret.addState("q1", false);
 
 		for (let prod of productors)
 			for (let value of prod.returns)
@@ -496,8 +496,17 @@ class PDA {
 		for (let term of terminals)
 			ret.addTransition(0, 0, term, term, [])
 
-		ret.type = "Empty Stack";
-		ret.stack_head = productors[0].name;
+		ret.type = "Final State";
+		let old_root = ret.states.find(x => x.root == true);
+		old_root.root = false;
+		delete(old_root.font);
+		let nroot_id = ret.nextStateId;
+		ret.states.push({id: ret.nextStateId++, label: "q0", root: true});
+		let finalId = ret.nextStateId;
+		ret.states.push({id: ret.nextStateId++, label: "q2", root: false, final: true});
+		ret.addTransition(nroot_id, 0, this.epsilon, "Z1", ["Zo","Z1"]);
+		ret.addTransition(0, finalId, this.epsilon, "Z1", []);
+		ret.stack_head = "Z1";
 
 		return ret;
 	}
