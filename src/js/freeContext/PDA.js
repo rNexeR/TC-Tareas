@@ -366,24 +366,84 @@ class PDA {
 	}
 
 	parseProductions(productions, terminals) {
+		// let productors = [];
+		// let productionsSplitted = productions.split("\n");
+		// for (let prod of productionsSplitted) {
+		// 	if (prod.includes("->")) {
+		// 		let temp = prod.split("->");
+		// 		if (!productors.map(x => x.name).includes(temp[0].trim(" "))) {
+		// 			console.log(productors);
+		// 			productors.push({ name: temp[0].trim(" "), returns: [] });
+		// 		}
+		// 		for (let i = 1; i < temp.length; i++) {
+		// 			let productorIndex = productors.map(x => x.name).indexOf(temp[0]);
+		// 			if (temp[i].length == 1) {
+		// 				productors[productorIndex].returns.push([temp[i]]);
+		// 			} else {
+		// 				let values = [];
+
+		// 				for (let j = 0; j < temp[i].length; j++) {
+		// 					values.push(temp[i][j])
+		// 				}
+		// 				productors[productorIndex].returns.push(values);
+		// 			}
+		// 		}
+		// 	} else {
+
+		// 		let produced = prod.replace("|", "").split("\n");
+		// 		for (let produ of produced) {
+		// 			for (let i = 0; i < produ.length; i++) {
+		// 				if (produ[i] != " ") {
+		// 					if (produ[i].length == 1) {
+		// 						productors[productors.length - 1].returns.push([produ[i]]);
+		// 					} else {
+		// 						let values = [];
+
+		// 						for (let j = 0; j < produ[i].length; j++) {
+		// 							values.push(produ[i][j])
+		// 						}
+		// 						productors[productors.length - 1].returns.push(values);
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
 		let productors = [];
 		let productionsSplitted = productions.split("\n");
 		for (let prod of productionsSplitted) {
 			if (prod.includes("->")) {
 				let temp = prod.split("->");
 				if (!productors.map(x => x.name).includes(temp[0].trim(" "))) {
-					console.log(productors);
 					productors.push({ name: temp[0].trim(" "), returns: [] });
 				}
 				for (let i = 1; i < temp.length; i++) {
 					let productorIndex = productors.map(x => x.name).indexOf(temp[0]);
+
 					if (temp[i].length == 1) {
 						productors[productorIndex].returns.push([temp[i]]);
 					} else {
 						let values = [];
 
 						for (let j = 0; j < temp[i].length; j++) {
-							values.push(temp[i][j])
+							let c = temp[i].charAt(j)
+							if (c != "[" && c != ']') {
+								values.push(c)
+							} else {
+								//console.log("Entro else");
+								let produccion = ""
+								for (let index = j; j < temp[i].length; index++) {
+									//console.log("TEmp[i][index]");
+									if (temp[i][index] != "]") {
+										produccion += temp[i][index]
+									} else {
+										produccion += "]"
+										j = index
+										break;
+									}
+								}
+								//console.log("Pusheo "+produccion);
+								values.push(produccion)
+							}
 						}
 						productors[productorIndex].returns.push(values);
 					}
@@ -392,24 +452,31 @@ class PDA {
 
 				let produced = prod.replace("|", "").split("\n");
 				for (let produ of produced) {
+					let values = [];
 					for (let i = 0; i < produ.length; i++) {
-						if (produ[i] != " ") {
-							if (produ[i].length == 1) {
-								productors[productors.length - 1].returns.push([produ[i]]);
-							} else {
-								let values = [];
-
-								for (let j = 0; j < produ[i].length; j++) {
-									values.push(produ[i][j])
+						if (produ[i] != "[" && produ[i] != "]") {
+							values.push(produ[i])
+						} else {
+							let produccion = ""
+							for (let index = i; index < produ.length; index++) {
+								if (produ[index] != "]")
+									produccion += produ[index]
+								else {
+									produccion += "]"
+									i = index
+									break;
 								}
-								productors[productors.length - 1].returns.push(values);
 							}
+							//console.log("Pusheo 2"+produccion);
+							values.push(produccion)
 						}
 					}
+					productors[productors.length - 1].returns.push(values);
 				}
 			}
 		}
 		return productors;
+
 	}
 
 	fromCFG(productions, terminals) {
@@ -474,29 +541,29 @@ class PDA {
 	toCFG_p3() {
 		let ret = ""
 
-		for(let transition of this.transitions){
-			if(transition.push.length > 0){
+		for (let transition of this.transitions) {
+			if (transition.push.length > 0) {
 				let m = transition.push.length
 				let permut = this.permut(m);
 				let from = this.findStateById(transition.from).label;
-				for(let row of permut){
+				for (let row of permut) {
 					console.log(row);
-					ret += "[" + from + " " + transition.head + " " + row[m-1] + "]" + "->" + transition.symbol;
+					ret += "[" + from + " " + transition.head + " " + row[m - 1] + "]" + "->" + transition.symbol;
 
-					this.productions.push("[" + from + " " + transition.head + " " + row[m-1] + "]");
+					this.productions.push("[" + from + " " + transition.head + " " + row[m - 1] + "]");
 
-					for(let i = 0; i < m; i++){
+					for (let i = 0; i < m; i++) {
 						let p1 = from;
-						if(i > 0)
-							p1 = row[i-1];
+						if (i > 0)
+							p1 = row[i - 1];
 						let p2 = row[i];
-						
+
 
 						ret += "[" + p1 + " " + transition.push[i] + " " + p2 + "]"
 						this.productions.push("[" + p1 + " " + transition.push[i] + " " + p2 + "]")
 					}
 
-					ret += "\n"; 
+					ret += "\n";
 				}
 			}
 		}
@@ -541,9 +608,9 @@ class PDA {
 
 		this.productions = removeDuplicates(this.productions);
 		let current_prod = 66;
-		for(let prod of this.productions){
-			ret = ret.split(prod).join(String.fromCharCode(current_prod++));
-		}
+		// for(let prod of this.productions){
+		// 	ret = ret.split(prod).join(String.fromCharCode(current_prod++));
+		// }
 
 		return ret;
 	}
